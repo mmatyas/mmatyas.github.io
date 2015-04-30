@@ -11,7 +11,6 @@ var ctx = c.getContext("2d");
 ctx.fillStyle = "rgb(100, 255, 100)";
 
 var t = 0;
-
 function anim() {
 	ctx.fillStyle = "rgb(100, " + (t * 10) + ", 100)";
 	ctx.fillRect(t * 15, t * 15, 40, 30);
@@ -19,7 +18,19 @@ function anim() {
 	if (t < 25)
 		window.setTimeout(anim, 100);
 }
-anim();
+
+function restart() {
+	ctx.clearRect(0, 0, c.width, c.height);
+
+	t = 0;
+	anim();
+
+	var d = new Date();
+	var sec = d.getSeconds();
+	window.setTimeout(restart, (5 - (sec % 5)) * 1000);
+}
+restart();
+
 </script>
 
 </body>
