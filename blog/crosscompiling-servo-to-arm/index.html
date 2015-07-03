@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Cross-compiling Servo to ARM</title>
+  <meta name="description" content="While Servo supports Android for a while now, it turned out cross compiling to ARM devices requires some additional work. Now that most of these patches have...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="https://mmatyas.github.io/crosscompiling-servo-to-arm">
+  <link rel="alternate" type="application/rss+xml" title="mmatyas.github.io" href="https://mmatyas.github.io/feed.xml" />
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">mmatyas.github.io</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Cross-compiling Servo to ARM</h1>
+    <p class="post-meta">Jul 3, 2015</p>
+  </header>
+
+  <article class="post-content">
+    <p>While <a href="https://github.com/servo/servo">Servo</a> supports Android for a while now, it turned out cross compiling to ARM devices requires <a href="https://github.com/servo/servo/issues/6327">some additional work</a>. Now that most of these patches have landed, it is possible to build for ARM with just some minor tweaks.</p>
+
+<p>For reference, in this post I’m going to use Servo at commit <a href="https://github.com/servo/servo/commit/73b52c095a448116c0f9db23894a0932d0d53484">73b52c0</a>, which requires Rust version <code>2d0cbf3e3e25e092bd9e4c94d08e446b680869f0</code>. For the build you will need the Rust standart library of this version, compiled to ARM. Unfortunately, you might also have to build that yourself; follow the Rust part of the <a href="https://github.com/servo/servo/wiki/Building-on-ARM-desktop-Linux">on-board building guide</a> in this case. You will also need the generic ARM libraries, but you can copy them either from the distribution running on your board or from a downloaded system installer, eg. a Raspbian image.</p>
+
+<h2 id="setting-up-a-rootfs">Setting up a rootfs</h2>
+
+<p>First, I’m going to set up an Ubuntu 14.04 rootfs to build in a clean environment. You can safely skip this step (just don’t forget to change the paths later).</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install debootstrap
+sudo debootstrap --arch<span class="o">=</span>amd64 trusty rootfs-trusty
+sudo mount -o <span class="nb">bind</span> /dev  rootfs-trusty/dev
+sudo mount -o <span class="nb">bind</span> /proc rootfs-trusty/proc
+sudo mount -o <span class="nb">bind</span> /sys  rootfs-trusty/sys
+sudo chroot rootfs-trusty /bin/bash</code></pre></div>
+
+<p>Then, add a new user inside the roots (again, you can skip this):</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">useradd -m servobuild -s /bin/bash
+passwd servobuild
+usermod -aG sudo servobuild
+su - servobuild</code></pre></div>
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<p>All right, let’s install the ARM compiler. There are many kinds of toolchains (eg. optimized for a certain board, like the Raspberry Pi), but the default one is fine for me:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get update
+sudo apt-get install g++-arm-linux-gnueabihf</code></pre></div>
+
+<p>Install the Servo dependencies (copied from the readme):</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install curl freeglut3-dev <span class="se">\</span>
+    libfreetype6-dev libgl1-mesa-dri libglib2.0-dev xorg-dev <span class="se">\</span>
+    gperf g++ cmake python-virtualenv <span class="se">\</span>
+    libssl-dev libbz2-dev libosmesa6-dev libxmu6 libxmu-dev</code></pre></div>
+
+<p><em>Note: if <code>python-virtualenv</code> is not found, install it like this:</em></p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install python-setuptools
+curl -O https://pypi.python.org/packages/source/v/virtualenv/virtualenv-13.0.3.tar.gz
+tar xzf virtualenv-13.0.3.tar.gz <span class="o">&amp;&amp;</span> <span class="nb">cd </span>virtualenv-13.0.3
+sudo python setup.py install</code></pre></div>
+
+<p>Oh, and we will also need git:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install git</code></pre></div>
+
+<p>Finally, download Servo, but leave it alone for now:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/servo</code></pre></div>
+
+<h2 id="updating-depandencies">Updating depandencies</h2>
+
+<p>I’ve just pushed some ARM patches to Servo and its dependencies, which have not landed yet. Fortunately, we can use custom versions of these repos without messing up the main directory, so we can apply these patches already.</p>
+
+<p>I’m going to store them in <code>servo_repos</code>:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir servo_repos <span class="o">&amp;&amp;</span> <span class="nb">cd </span>servo_repos</code></pre></div>
+
+<p>…and download each dependency which have an unlanded patch and apply it:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/libexpat.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>libexpat <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/libexpat/pull/6.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 6.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/mozjs.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>mozjs <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/mozjs/pull/48.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 48.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/rust-mozjs.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>rust-mozjs <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/rust-mozjs/pull/167.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 167.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/rust-png.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>rust-png <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/rust-png/pull/77.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 77.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/libfontconfig.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>libfontconfig <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/libfontconfig/pull/11.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 11.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/glutin.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>glutin <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/glutin/pull/32.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 32.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+<p>We can create a <a href="http://doc.crates.io/config.html">Cargo config file</a> for Servo to tell the location of these repos:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> ~/servo
+mkdir .cargo
+
+cat <span class="s">&lt;&lt; &#39;EOF&#39; &gt; .cargo/config</span>
+<span class="s">paths = [</span>
+<span class="s">    &quot;/home/servobuild/servo_repos/libexpat&quot;,</span>
+<span class="s">    &quot;/home/servobuild/servo_repos/libfontconfig&quot;,</span>
+<span class="s">    &quot;/home/servobuild/servo_repos/mozjs&quot;,</span>
+<span class="s">    &quot;/home/servobuild/servo_repos/rust-mozjs&quot;,</span>
+<span class="s">    &quot;/home/servobuild/servo_repos/rust-png&quot;,</span>
+<span class="s">    &quot;/home/servobuild/servo_repos/glutin&quot;</span>
+<span class="s">]</span>
+<span class="s">EOF</span></code></pre></div>
+
+<p>This will solve the problem of unlanded patches. Now, Servo doesn’t use the latest version of some dependencies, and as such by default they aren’t built for ARM. Let’s fix this:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">./mach cargo-update -p freetype-sys
+./mach cargo-update -p skia
+./mach cargo-update -p stb_image</code></pre></div>
+
+<h2 id="installing-libraries">Installing libraries</h2>
+
+<p>We will need to install the Rust standart library for ARM if we want to cross compile for it. Running </p>
+
+<p>./mach bootstrap-rust</p>
+
+<p>will download the Rust version user by Servo, and creates the directory structure wher we will copy the necessary files to.</p>
+
+<p>Let’s exit from the rootfs for a minute:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">exit</span>    <span class="c"># log out from &#39;servobuild&#39;</span>
+<span class="nb">exit</span>    <span class="c"># log out from the rootfs</span></code></pre></div>
+
+<p>and copy your previously compiled ARM rustlib to the correct location:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cp -R path/to/your/rustc/lib/rustlib/arm-unknown-linux-gnueabihf rootfs-trusty/home/servobuild/servo/.servo/rust/2d0cbf3e3e25e092bd9e4c94d08e446b680869f0/rustc-1.2.0-dev-x86_64-unknown-linux-gnu/rustc/lib/rustlib/</code></pre></div>
+
+<p>We will also need to install the ARM libraries if we don’t want to get linker errors:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo cp -R path/to/your/lib/arm-linux-gnueabihf rootfs-trusty/lib/
+sudo cp -R path/to/your/usr/lib/arm-linux-gnueabihf rootfs-trusty/usr/lib/</code></pre></div>
+
+<p>If you are not working in a rootfs, just remove the <code>rootfs-trusty</code> part of the commands.</p>
+
+<p>We’re done with the libraries, let’s go back into the roofs:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo chroot rootfs-trusty /bin/bash
+su - servobuild
+<span class="nb">cd </span>servo</code></pre></div>
+
+<p>There are two ‘missing header’ errors, apparently this is some packaging issue on certain distros. Anyway, you can fix it like this:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir -p /usr/include/arm-linux-gnueabihf/
+sudo ln -s /usr/include/x86_64-linux-gnu/openssl /usr/include/arm-linux-gnueabihf/
+sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabihf/</code></pre></div>
+
+<h2 id="building">Building!</h2>
+
+<p>Finally! If you’ve followed the previous steps correctly, running</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">CC</span><span class="o">=</span>arm-linux-gnueabihf-gcc <span class="se">\</span>
+<span class="nv">CXX</span><span class="o">=</span>arm-linux-gnueabihf-g++ <span class="se">\</span>
+<span class="nv">CPP</span><span class="o">=</span><span class="s2">&quot;arm-linux-gnueabihf-gcc -E&quot;</span> <span class="se">\</span>
+<span class="nv">LD</span><span class="o">=</span>arm-linux-gnueabihf-ld <span class="se">\</span>
+<span class="nv">AR</span><span class="o">=</span>arm-linux-gnueabihf-ar <span class="se">\</span>
+<span class="nv">RANLIB</span><span class="o">=</span>arm-linux-gnueabihf-ranlib <span class="se">\</span>
+./mach build --target<span class="o">=</span>arm-unknown-linux-gnueabihf --dev</code></pre></div>
+
+<p>should give you…. a huge linker error. Don’t worry, we’ll fix this. Some X11 linker flags are missing, and you will have to manually add them. Copy the failing command (starting from <code>"arm-linux-gnueabihf-gcc" "-Wl,--as-needed" "-L" ...</code> to <code>... "c" "-l" "m" "-l" "compiler-rt"</code>) to your favorite text editor, and first create a proper GCC command from it:</p>
+
+<ul>
+  <li>replace all <code>"-l" "</code> with <code>"-l</code></li>
+  <li>replace all <code>"-L" "</code> with <code>"-L</code></li>
+  <li>delete all <code>"</code></li>
+</ul>
+
+<p>(<em>If you know a better way for this, tell me!</em>)</p>
+
+<p>And add these three flags to the end:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">-lXxf86vm -lXmu -lXcursor</code></pre></div>
+
+<p><img src="https://mmatyas.github.io/assets/servocross_final.png" alt="Servo building final step" /></p>
+
+<p>If you’re lucky, Servo will now build correctly and you can find it at <code>./target/arm-unknown-linux-gnueabihf/debug/servo</code>. Congratulations!</p>
+
+<h2 id="issues">Issues</h2>
+
+<p>Servo still has some visual (X11 and OpenGL) problems on embedded Linux, whether you build on board or cross compile.</p>
+
+<p>For some dependencies the ARM patches cause problems when you try to compile for Android. This is currently investigated.</p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+  </body>
+
+</html>
