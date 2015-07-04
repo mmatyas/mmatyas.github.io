@@ -227,7 +227,11 @@ sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabih
 <span class="nv">RANLIB</span><span class="o">=</span>arm-linux-gnueabihf-ranlib <span class="se">\</span>
 ./mach build --target<span class="o">=</span>arm-unknown-linux-gnueabihf --dev</code></pre></div>
 
-<p>should give you…. a huge linker error. Don’t worry, we’ll fix this. Some X11 linker flags are missing, and you will have to manually add them. Copy the failing command (starting from <code>"arm-linux-gnueabihf-gcc" "-Wl,--as-needed" "-L" ...</code> to <code>... "c" "-l" "m" "-l" "compiler-rt"</code>) to your favorite text editor, and first create a proper GCC command from it:</p>
+<p>should give you</p>
+
+<p><img src="https://mmatyas.github.io/blog/assets/servocross_linkererror.png" alt="Servo linking error" /></p>
+
+<p>… a huge linker error. Don’t worry, we’ll fix this. <a href="https://github.com/servo/servo/issues/6483">It seems</a> this is also a packaging problem on Ubuntu; some X11 linker flags are missing, and you will have to add them manually. Copy the failing command (starting from <code>"arm-linux-gnueabihf-gcc" "-Wl,--as-needed" "-L" ...</code> to <code>... "c" "-l" "m" "-l" "compiler-rt"</code>) to your favorite text editor, and first create a proper GCC command from it:</p>
 
 <ul>
   <li>replace all <code>"-l" "</code> with <code>"-l</code></li>

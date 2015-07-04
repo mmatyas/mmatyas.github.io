@@ -5,8 +5,8 @@
     <description></description>
     <link>https://mmatyas.github.io/blog/</link>
     <atom:link href="https://mmatyas.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 04 Jul 2015 10:50:30 +0200</pubDate>
-    <lastBuildDate>Sat, 04 Jul 2015 10:50:30 +0200</lastBuildDate>
+    <pubDate>Sat, 04 Jul 2015 11:17:38 +0200</pubDate>
+    <lastBuildDate>Sat, 04 Jul 2015 11:17:38 +0200</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -180,7 +180,11 @@ sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabih
 &lt;span class=&quot;nv&quot;&gt;RANLIB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-ranlib &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach build --target&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-unknown-linux-gnueabihf --dev&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;should give you…. a huge linker error. Don’t worry, we’ll fix this. Some X11 linker flags are missing, and you will have to manually add them. Copy the failing command (starting from &lt;code&gt;&quot;arm-linux-gnueabihf-gcc&quot; &quot;-Wl,--as-needed&quot; &quot;-L&quot; ...&lt;/code&gt; to &lt;code&gt;... &quot;c&quot; &quot;-l&quot; &quot;m&quot; &quot;-l&quot; &quot;compiler-rt&quot;&lt;/code&gt;) to your favorite text editor, and first create a proper GCC command from it:&lt;/p&gt;
+&lt;p&gt;should give you&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://mmatyas.github.io/blog/assets/servocross_linkererror.png&quot; alt=&quot;Servo linking error&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;… a huge linker error. Don’t worry, we’ll fix this. &lt;a href=&quot;https://github.com/servo/servo/issues/6483&quot;&gt;It seems&lt;/a&gt; this is also a packaging problem on Ubuntu; some X11 linker flags are missing, and you will have to add them manually. Copy the failing command (starting from &lt;code&gt;&quot;arm-linux-gnueabihf-gcc&quot; &quot;-Wl,--as-needed&quot; &quot;-L&quot; ...&lt;/code&gt; to &lt;code&gt;... &quot;c&quot; &quot;-l&quot; &quot;m&quot; &quot;-l&quot; &quot;compiler-rt&quot;&lt;/code&gt;) to your favorite text editor, and first create a proper GCC command from it:&lt;/p&gt;
 
 &lt;ul&gt;
   &lt;li&gt;replace all &lt;code&gt;&quot;-l&quot; &quot;&lt;/code&gt; with &lt;code&gt;&quot;-l&lt;/code&gt;&lt;/li&gt;
