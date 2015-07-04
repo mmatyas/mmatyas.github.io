@@ -60,7 +60,7 @@
   <article class="post-content">
     <p>While <a href="https://github.com/servo/servo">Servo</a> supports Android for a while now, it turned out cross compiling to ARM devices requires <a href="https://github.com/servo/servo/issues/6327">some additional work</a>. Now that most of these patches have landed, it is possible to build for ARM with just some minor tweaks.</p>
 
-<p>For reference, in this post I’m going to use Servo at commit <a href="https://github.com/servo/servo/commit/73b52c095a448116c0f9db23894a0932d0d53484">73b52c0</a>, which requires Rust version <code>2d0cbf3e3e25e092bd9e4c94d08e446b680869f0</code>. For the build you will need the Rust standart library of this version, compiled to ARM. Unfortunately, you might also have to build that yourself; follow the Rust part of the <a href="https://github.com/servo/servo/wiki/Building-on-ARM-desktop-Linux">on-board building guide</a> in this case. You will also need the generic ARM libraries, but you can copy them either from the distribution running on your board or from a downloaded system installer, eg. a Raspbian image.</p>
+<p>For reference, in this post I’m going to use Servo at commit <a href="https://github.com/servo/servo/commit/73b52c095a448116c0f9db23894a0932d0d53484">73b52c0</a>, which requires Rust version <code>2d0cbf3e3e25e092bd9e4c94d08e446b680869f0</code>. You will need the Rust standart library of this version, compiled to ARM. Unfortunately, you will probably have to build that yourself too, as it’s not distributed with Rust yet. The first part of the <a href="https://github.com/servo/servo/wiki/Building-on-ARM-desktop-Linux">on-board building guide</a> describes how to do it. You will also need the ARM system libraries, but you can copy them either from the distribution running on your board or from a downloaded system installer, eg. a Raspbian image.</p>
 
 <h2 id="setting-up-a-rootfs">Setting up a rootfs</h2>
 
@@ -94,12 +94,18 @@ sudo apt-get install g++-arm-linux-gnueabihf</code></pre></div>
     gperf g++ cmake python-virtualenv <span class="se">\</span>
     libssl-dev libbz2-dev libosmesa6-dev libxmu6 libxmu-dev</code></pre></div>
 
-<p><em>Note: if <code>python-virtualenv</code> is not found, install it like this:</em></p>
+<div class="note">
+
+Note: if `python-virtualenv` is not found, install it like this:
+
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install python-setuptools
 curl -O https://pypi.python.org/packages/source/v/virtualenv/virtualenv-13.0.3.tar.gz
 tar xzf virtualenv-13.0.3.tar.gz <span class="o">&amp;&amp;</span> <span class="nb">cd </span>virtualenv-13.0.3
 sudo python setup.py install</code></pre></div>
+
+
+</div>
 
 <p>Oh, and we will also need git:</p>
 
@@ -111,13 +117,13 @@ sudo python setup.py install</code></pre></div>
 
 <h2 id="updating-depandencies">Updating depandencies</h2>
 
-<p>I’ve just pushed some ARM patches to Servo and its dependencies, which have not landed yet. Fortunately, we can use custom versions of these repos without messing up the main directory, so we can apply these patches already.</p>
+<p>I’ve just pushed some ARM patches to Servo and its dependencies, which have not landed yet. Fortunately, we can use custom versions of these repos without messing up the main Servo (Cargo) directory, so we can apply these changes already.</p>
 
-<p>I’m going to store them in <code>servo_repos</code>:</p>
+<p>I’m going to store these git repositories in <code>servo_repos</code>:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir servo_repos <span class="o">&amp;&amp;</span> <span class="nb">cd </span>servo_repos</code></pre></div>
 
-<p>…and download each dependency which have an unlanded patch and apply it:</p>
+<p>and download each dependency which have an unlanded patch and apply it:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/libexpat.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>libexpat <span class="o">&amp;&amp;</span> <span class="se">\</span>
 curl -LO https://github.com/servo/libexpat/pull/6.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
@@ -149,7 +155,7 @@ curl -LO https://github.com/servo/glutin/pull/32.diff <span class="o">&amp;&amp;
 git apply 32.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">cd</span> ..</code></pre></div>
 
-<p>We can create a <a href="http://doc.crates.io/config.html">Cargo config file</a> for Servo to tell the location of these repos:</p>
+<p>Now we have to create a <a href="http://doc.crates.io/config.html">Cargo config file</a> for Servo to tell the location of these repos:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> ~/servo
 mkdir .cargo
@@ -165,7 +171,7 @@ cat <span class="s">&lt;&lt; &#39;EOF&#39; &gt; .cargo/config</span>
 <span class="s">]</span>
 <span class="s">EOF</span></code></pre></div>
 
-<p>This will solve the problem of unlanded patches. Now, Servo doesn’t use the latest version of some dependencies, and as such by default they aren’t built for ARM. Let’s fix this:</p>
+<p>This will solve the problem of unlanded patches. Now, some dependencies have ARM cross compile patches already, but Servo doesn’t use the latest version of these. Let’s update them:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">./mach cargo-update -p freetype-sys
 ./mach cargo-update -p skia
@@ -173,35 +179,39 @@ cat <span class="s">&lt;&lt; &#39;EOF&#39; &gt; .cargo/config</span>
 
 <h2 id="installing-libraries">Installing libraries</h2>
 
-<p>We will need to install the Rust standart library for ARM if we want to cross compile for it. Running </p>
+<p>We will need to install the Rust standart library for ARM if we want to cross compile programs written in Rust. Running</p>
 
-<p>./mach bootstrap-rust</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">./mach bootstrap-rust</code></pre></div>
 
-<p>will download the Rust version user by Servo, and creates the directory structure wher we will copy the necessary files to.</p>
+<p>will download the Rust version user by Servo, and creates the directory structure to where we will copy the necessary files.</p>
 
 <p>Let’s exit from the rootfs for a minute:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">exit</span>    <span class="c"># log out from &#39;servobuild&#39;</span>
 <span class="nb">exit</span>    <span class="c"># log out from the rootfs</span></code></pre></div>
 
-<p>and copy your previously compiled ARM rustlib to the correct location:</p>
+<p>and copy your ARM Rust libraries to the correct location:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">cp -R path/to/your/rustc/lib/rustlib/arm-unknown-linux-gnueabihf rootfs-trusty/home/servobuild/servo/.servo/rust/2d0cbf3e3e25e092bd9e4c94d08e446b680869f0/rustc-1.2.0-dev-x86_64-unknown-linux-gnu/rustc/lib/rustlib/</code></pre></div>
 
-<p>We will also need to install the ARM libraries if we don’t want to get linker errors:</p>
+<p>We will also need to install the ARM system libraries if we don’t want to get linker errors:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo cp -R path/to/your/lib/arm-linux-gnueabihf rootfs-trusty/lib/
 sudo cp -R path/to/your/usr/lib/arm-linux-gnueabihf rootfs-trusty/usr/lib/</code></pre></div>
 
-<p>If you are not working in a rootfs, just remove the <code>rootfs-trusty</code> part of the commands.</p>
+<div class="note">
 
-<p>We’re done with the libraries, let’s go back into the roofs:</p>
+If you are not working in a rootfs, just remove the `rootfs-trusty` part of the commands.
+
+</div>
+
+<p>We’re done with the libraries, let’s go back into the rootfs:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo chroot rootfs-trusty /bin/bash
 su - servobuild
 <span class="nb">cd </span>servo</code></pre></div>
 
-<p>There are two ‘missing header’ errors, apparently this is some packaging issue on certain distros. Anyway, you can fix it like this:</p>
+<p>There are two ‘missing header’ errors, for OpenSSL and Zlib. Apparently this is a packaging issue on certain distros. Anyway, you can fix it like this:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir -p /usr/include/arm-linux-gnueabihf/
 sudo ln -s /usr/include/x86_64-linux-gnu/openssl /usr/include/arm-linux-gnueabihf/
@@ -226,8 +236,6 @@ sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabih
   <li>replace all <code>"-L" "</code> with <code>"-L</code></li>
   <li>delete all <code>"</code></li>
 </ul>
-
-<p>(<em>If you know a better way for this, tell me!</em>)</p>
 
 <p>And add these three flags to the end:</p>
 
