@@ -213,6 +213,12 @@ git submodule update
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">cp -R path/to/your/rustc/lib/rustlib/arm-unknown-linux-gnueabihf rootfs-trusty/home/servobuild/servo/.servo/rust/2d0cbf3e3e25e092bd9e4c94d08e446b680869f0/rustc-1.2.0-dev-x86_64-unknown-linux-gnu/rustc/lib/rustlib/</code></pre></div>
 
+<div class="note">
+
+  <p>Note: Your target directory might have a different Rust hash/version.</p>
+
+</div>
+
 <p>We will also need to install the ARM system libraries if we don’t want to get linker errors later:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo cp -R path/to/your/lib/arm-linux-gnueabihf rootfs-trusty/lib/
