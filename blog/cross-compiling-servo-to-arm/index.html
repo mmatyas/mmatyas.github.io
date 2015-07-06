@@ -113,7 +113,7 @@ sudo python setup.py install</code></pre></div>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/servo</code></pre></div>
 
-<h2 id="updating-depandencies">Updating depandencies</h2>
+<h2 id="updating-dependencies">Updating dependencies</h2>
 
 <p>I’ve just pushed some ARM patches to Servo and its dependencies, which have not landed yet. Fortunately, we can use custom versions of these repos without messing up the main Servo (Cargo) directory, so we can apply these changes already.</p>
 
@@ -169,21 +169,42 @@ cat <span class="s">&lt;&lt; &#39;EOF&#39; &gt; .cargo/config</span>
 <span class="s">]</span>
 <span class="s">EOF</span></code></pre></div>
 
-<p>This will solve the problem of unlanded patches. Now, some dependencies have ARM cross compile patches already, but Servo doesn’t use the latest version of these. Let’s update them:</p>
+<p>This will solve the problem of unlanded patches. Now, some dependencies have ARM cross compile patches already, but Servo doesn’t use the latest version of these. To update them, we have to initialize the build system first:</p>
+
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">git submodule init
+git submodule update
+./mach bootstrap-rust
+./mach bootstrap-cargo</code></pre></div>
+
+<p>which will download Rust and Cargo used by Servo, and creates the directory structure to where we will copy the Rust libraries in the next section.</p>
+
+<div class="note">
+
+  <p>Alternatively, you can just run <code>./mach build</code>, which also does this for you, but the build itself will fail at this point.</p>
+
+</div>
+
+<p>Now that we have set up the build system, we can get the updated dependencies like this:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">./mach cargo-update -p freetype-sys
 ./mach cargo-update -p skia
 ./mach cargo-update -p stb_image</code></pre></div>
 
+<div class="note">
+
+  <p>You can also specify a target Git hash for each package with the <code>--precise</code> flag. At the time of writing,</p>
+
+  <div class="highlight"><pre><code class="language-bash" data-lang="bash">./mach cargo-update -p freetype-sys --precise 39b368440712818ce8b071daf04d73541640de6b
+./mach cargo-update -p skia --precise 7a2ce925644274b8468099c3900425a9349757eb
+./mach cargo-update -p stb_image --precise 2235148b8230828ac0b96291def283e82fc4cfdd</code></pre></div>
+
+  <p>can also be used for getting the latest versions.</p>
+
+</div>
+
 <h2 id="installing-libraries">Installing libraries</h2>
 
-<p>We will need to install the Rust standart library for ARM if we want to cross compile programs written in Rust. Running</p>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">./mach bootstrap-rust</code></pre></div>
-
-<p>will download the Rust version user by Servo, and creates the directory structure to where we will copy the necessary files.</p>
-
-<p>Let’s exit from the rootfs for a minute:</p>
+<p>We will need to install the Rust standart library for ARM if we want to cross compile programs written in Rust. Let’s exit from the rootfs for a minute:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">exit</span>    <span class="c"># log out from &#39;servobuild&#39;</span>
 <span class="nb">exit</span>    <span class="c"># log out from the rootfs</span></code></pre></div>
@@ -192,7 +213,7 @@ cat <span class="s">&lt;&lt; &#39;EOF&#39; &gt; .cargo/config</span>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">cp -R path/to/your/rustc/lib/rustlib/arm-unknown-linux-gnueabihf rootfs-trusty/home/servobuild/servo/.servo/rust/2d0cbf3e3e25e092bd9e4c94d08e446b680869f0/rustc-1.2.0-dev-x86_64-unknown-linux-gnu/rustc/lib/rustlib/</code></pre></div>
 
-<p>We will also need to install the ARM system libraries if we don’t want to get linker errors:</p>
+<p>We will also need to install the ARM system libraries if we don’t want to get linker errors later:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">sudo cp -R path/to/your/lib/arm-linux-gnueabihf rootfs-trusty/lib/
 sudo cp -R path/to/your/usr/lib/arm-linux-gnueabihf rootfs-trusty/usr/lib/</code></pre></div>
