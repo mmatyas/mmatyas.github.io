@@ -60,6 +60,12 @@
   <article class="post-content">
     <p>While <a href="https://github.com/servo/servo">Servo</a> supports Android for a while now, it turned out cross compiling to ARM devices requires <a href="https://github.com/servo/servo/issues/6327">some additional work</a>. Now that most of these patches have landed, it is possible to build for ARM with just some minor tweaks.</p>
 
+<div class="note">
+
+  <p><strong>UPDATE:</strong> This tutorial has also been posted here: <a href="http://browser.sed.hu/blog/20150717/cross-compiling-servo-arm">http://browser.sed.hu/blog/20150717/cross-compiling-servo-arm</a>. Please visit the site if you wish to leave comments.</p>
+
+</div>
+
 <p>For reference, in this post I’m going to use Servo at commit <a href="https://github.com/servo/servo/commit/73b52c095a448116c0f9db23894a0932d0d53484">73b52c0</a>, which requires Rust version <code>2d0cbf3e3e25e092bd9e4c94d08e446b680869f0</code>. You will need the Rust standart library of this version, compiled to ARM. Unfortunately, you will probably have to build that yourself too, as it’s not distributed with Rust yet. The first part of the <a href="https://github.com/servo/servo/wiki/Building-on-ARM-desktop-Linux">on-board building guide</a> describes how to do it. You will also need the ARM system libraries, but you can copy them either from the distribution running on your board or from a downloaded system installer, eg. a Raspbian image.</p>
 
 <h2 id="setting-up-a-rootfs">Setting up a rootfs</h2>
