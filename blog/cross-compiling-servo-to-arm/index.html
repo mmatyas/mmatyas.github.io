@@ -62,7 +62,9 @@
 
 <div class="note">
 
-  <p><strong>UPDATE:</strong> This tutorial has also been posted here: <a href="http://browser.sed.hu/blog/20150717/cross-compiling-servo-arm">http://browser.sed.hu/blog/20150717/cross-compiling-servo-arm</a>. Please visit the site if you wish to leave comments.</p>
+  <p><strong>UPDATE:</strong> This tutorial has also been posted here: <a href="http://browser.sed.hu/blog/20150717/cross-compiling-servo-arm">http://browser.sed.hu/blog/20150717/cross-compiling-servo-arm</a>. Please visit that site if you wish to leave comments.</p>
+
+  <p><strong>UPDATE 2:</strong> Most of the patches have landed, post updated.</p>
 
 </div>
 
@@ -129,48 +131,63 @@ sudo python setup.py install</code></pre></div>
 
 <p>and download each dependency which have an unlanded patch and apply it:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/libexpat.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>libexpat <span class="o">&amp;&amp;</span> <span class="se">\</span>
-curl -LO https://github.com/servo/libexpat/pull/6.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
-git apply 6.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<span class="nb">cd</span> ..</code></pre></div>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/mozjs.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>mozjs <span class="o">&amp;&amp;</span> <span class="se">\</span>
-curl -LO https://github.com/servo/mozjs/pull/48.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
-git apply 48.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<span class="nb">cd</span> ..</code></pre></div>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/rust-mozjs.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>rust-mozjs <span class="o">&amp;&amp;</span> <span class="se">\</span>
-curl -LO https://github.com/servo/rust-mozjs/pull/167.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
-git apply 167.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<span class="nb">cd</span> ..</code></pre></div>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/rust-png.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>rust-png <span class="o">&amp;&amp;</span> <span class="se">\</span>
-curl -LO https://github.com/servo/rust-png/pull/77.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
-git apply 77.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<span class="nb">cd</span> ..</code></pre></div>
-
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/libfontconfig.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>libfontconfig <span class="o">&amp;&amp;</span> <span class="se">\</span>
-curl -LO https://github.com/servo/libfontconfig/pull/11.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
-git apply 11.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
-<span class="nb">cd</span> ..</code></pre></div>
-
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/glutin.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>glutin <span class="o">&amp;&amp;</span> <span class="se">\</span>
 curl -LO https://github.com/servo/glutin/pull/32.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
 git apply 32.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">cd</span> ..</code></pre></div>
 
+<script type="text/javascript">
+function toggleOldcontent() {
+  var oldies = document.getElementsByClassName("oldcontent");
+  for (var i = 0; i < oldies.length; i++) {
+    if (oldies[i].style.display == "none")
+      oldies[i].style.display = "block";
+    else
+      oldies[i].style.display = "none";
+  }
+}
+</script>
+
+<p><a href="javascript:toggleOldcontent()">+ Show already landed patches</a></p>
+
+<div class="note oldcontent" style="display:none">
+
+  <p>These patches have already landed, you can get them by <code>mach cargo-update</code> (see later), or manually:</p>
+
+  <div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/libexpat.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>libexpat <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/libexpat/pull/6.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 6.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+  <div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/mozjs.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>mozjs <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/mozjs/pull/48.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 48.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+  <div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/rust-mozjs.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>rust-mozjs <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/rust-mozjs/pull/167.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 167.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+  <div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/rust-png.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>rust-png <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/rust-png/pull/77.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 77.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+  <div class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/libfontconfig.git <span class="o">&amp;&amp;</span> <span class="nb">cd </span>libfontconfig <span class="o">&amp;&amp;</span> <span class="se">\</span>
+curl -LO https://github.com/servo/libfontconfig/pull/11.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+git apply 11.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> ..</code></pre></div>
+
+</div>
+
 <p>Now we have to create a <a href="http://doc.crates.io/config.html">Cargo config file</a> for Servo to tell the location of these repos:</p>
 
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nb">cd</span> ~/servo
-mkdir .cargo
+mkdir .cargo</code></pre></div>
 
-cat <span class="s">&lt;&lt; &#39;EOF&#39; &gt; .cargo/config</span>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">cat <span class="s">&lt;&lt; &#39;EOF&#39; &gt; .cargo/config</span>
 <span class="s">paths = [</span>
-<span class="s">    &quot;/home/servobuild/servo_repos/libexpat&quot;,</span>
-<span class="s">    &quot;/home/servobuild/servo_repos/libfontconfig&quot;,</span>
-<span class="s">    &quot;/home/servobuild/servo_repos/mozjs&quot;,</span>
-<span class="s">    &quot;/home/servobuild/servo_repos/rust-mozjs&quot;,</span>
-<span class="s">    &quot;/home/servobuild/servo_repos/rust-png&quot;,</span>
 <span class="s">    &quot;/home/servobuild/servo_repos/glutin&quot;</span>
 <span class="s">]</span>
 <span class="s">EOF</span></code></pre></div>
@@ -192,17 +209,28 @@ git submodule update
 
 <p>Now that we have set up the build system, we can get the updated dependencies like this:</p>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">./mach cargo-update -p freetype-sys
-./mach cargo-update -p skia
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">./mach cargo-update -p azure           <span class="o">&amp;&amp;</span> <span class="se">\</span>
+./mach cargo-update -p fontconfig-sys  <span class="o">&amp;&amp;</span> <span class="se">\</span>
+./mach cargo-update -p freetype-sys    <span class="o">&amp;&amp;</span> <span class="se">\</span>
+./mach cargo-update -p mozjs_sys       <span class="o">&amp;&amp;</span> <span class="se">\</span>
+./mach cargo-update -p js              <span class="o">&amp;&amp;</span> <span class="se">\</span>
+./mach cargo-update -p png-sys         <span class="o">&amp;&amp;</span> <span class="se">\</span>
+./mach cargo-update -p skia            <span class="o">&amp;&amp;</span> <span class="se">\</span>
 ./mach cargo-update -p stb_image</code></pre></div>
+<p>  </p>
 
 <div class="note">
 
   <p>You can also specify a target Git hash for each package with the <code>--precise</code> flag. At the time of writing,</p>
 
-  <div class="highlight"><pre><code class="language-bash" data-lang="bash">./mach cargo-update -p freetype-sys --precise 39b368440712818ce8b071daf04d73541640de6b
-./mach cargo-update -p skia --precise 7a2ce925644274b8468099c3900425a9349757eb
-./mach cargo-update -p stb_image --precise 2235148b8230828ac0b96291def283e82fc4cfdd</code></pre></div>
+  <div class="highlight"><pre><code class="language-bash" data-lang="bash">./mach cargo-update -p azure --precise 0ee76c98d92b0ff180f8b4474c4f4b7c80b67ecf
+./mach cargo-update -p fontconfig-sys --precise b01ee3e2f8523a6566b8e5d406a2176ccb574060
+./mach cargo-update -p freetype-sys --precise 23b2ebba10639716c8f9e37945ee37dacc68b195
+./mach cargo-update -p mozjs_sys --precise 290ae28abec5a3f2bdc7ed8508ce02f86ac2c3e4
+./mach cargo-update -p js --precise 5da854e637fcfeefe4aebda0b66fc2406ea7dc63
+./mach cargo-update -p png-sys --precise a3569ca11ea54e5d6152ee80d7d39b2799700dbf
+./mach cargo-update -p skia --precise 0e2cc56c36ca08371777e11be018d93d2a877881
+./mach cargo-update -p stb_image --precise ddb122381df6249f7916c3cdadd9f42396d36602</code></pre></div>
 
   <p>can also be used for getting the latest versions.</p>
 

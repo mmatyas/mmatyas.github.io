@@ -5,8 +5,8 @@
     <description></description>
     <link>https://mmatyas.github.io/blog/</link>
     <atom:link href="https://mmatyas.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 19 Jul 2015 21:46:03 +0200</pubDate>
-    <lastBuildDate>Sun, 19 Jul 2015 21:46:03 +0200</lastBuildDate>
+    <pubDate>Fri, 07 Aug 2015 13:40:56 +0200</pubDate>
+    <lastBuildDate>Fri, 07 Aug 2015 13:40:56 +0200</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -15,7 +15,9 @@
 
 &lt;div class=&quot;note&quot;&gt;
 
-  &lt;p&gt;&lt;strong&gt;UPDATE:&lt;/strong&gt; This tutorial has also been posted here: &lt;a href=&quot;http://browser.sed.hu/blog/20150717/cross-compiling-servo-arm&quot;&gt;http://browser.sed.hu/blog/20150717/cross-compiling-servo-arm&lt;/a&gt;. Please visit the site if you wish to leave comments.&lt;/p&gt;
+  &lt;p&gt;&lt;strong&gt;UPDATE:&lt;/strong&gt; This tutorial has also been posted here: &lt;a href=&quot;http://browser.sed.hu/blog/20150717/cross-compiling-servo-arm&quot;&gt;http://browser.sed.hu/blog/20150717/cross-compiling-servo-arm&lt;/a&gt;. Please visit that site if you wish to leave comments.&lt;/p&gt;
+
+  &lt;p&gt;&lt;strong&gt;UPDATE 2:&lt;/strong&gt; Most of the patches have landed, post updated.&lt;/p&gt;
 
 &lt;/div&gt;
 
@@ -82,48 +84,63 @@ sudo python setup.py install&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;and download each dependency which have an unlanded patch and apply it:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/libexpat.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;libexpat &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-curl -LO https://github.com/servo/libexpat/pull/6.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-git apply 6.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/mozjs.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;mozjs &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-curl -LO https://github.com/servo/mozjs/pull/48.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-git apply 48.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/rust-mozjs.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;rust-mozjs &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-curl -LO https://github.com/servo/rust-mozjs/pull/167.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-git apply 167.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/rust-png.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;rust-png &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-curl -LO https://github.com/servo/rust-png/pull/77.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-git apply 77.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/libfontconfig.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;libfontconfig &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-curl -LO https://github.com/servo/libfontconfig/pull/11.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-git apply 11.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/glutin.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;glutin &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 curl -LO https://github.com/servo/glutin/pull/32.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 git apply 32.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;script type=&quot;text/javascript&quot;&gt;
+function toggleOldcontent() {
+  var oldies = document.getElementsByClassName(&quot;oldcontent&quot;);
+  for (var i = 0; i &lt; oldies.length; i++) {
+    if (oldies[i].style.display == &quot;none&quot;)
+      oldies[i].style.display = &quot;block&quot;;
+    else
+      oldies[i].style.display = &quot;none&quot;;
+  }
+}
+&lt;/script&gt;
+
+&lt;p&gt;&lt;a href=&quot;javascript:toggleOldcontent()&quot;&gt;+ Show already landed patches&lt;/a&gt;&lt;/p&gt;
+
+&lt;div class=&quot;note oldcontent&quot; style=&quot;display:none&quot;&gt;
+
+  &lt;p&gt;These patches have already landed, you can get them by &lt;code&gt;mach cargo-update&lt;/code&gt; (see later), or manually:&lt;/p&gt;
+
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/libexpat.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;libexpat &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+curl -LO https://github.com/servo/libexpat/pull/6.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+git apply 6.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/mozjs.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;mozjs &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+curl -LO https://github.com/servo/mozjs/pull/48.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+git apply 48.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/rust-mozjs.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;rust-mozjs &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+curl -LO https://github.com/servo/rust-mozjs/pull/167.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+git apply 167.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/rust-png.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;rust-png &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+curl -LO https://github.com/servo/rust-png/pull/77.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+git apply 77.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/libfontconfig.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;libfontconfig &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+curl -LO https://github.com/servo/libfontconfig/pull/11.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+git apply 11.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+
 &lt;p&gt;Now we have to create a &lt;a href=&quot;http://doc.crates.io/config.html&quot;&gt;Cargo config file&lt;/a&gt; for Servo to tell the location of these repos:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ~/servo
-mkdir .cargo
+mkdir .cargo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-cat &lt;span class=&quot;s&quot;&gt;&amp;lt;&amp;lt; &amp;#39;EOF&amp;#39; &amp;gt; .cargo/config&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;cat &lt;span class=&quot;s&quot;&gt;&amp;lt;&amp;lt; &amp;#39;EOF&amp;#39; &amp;gt; .cargo/config&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;paths = [&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/libexpat&amp;quot;,&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/libfontconfig&amp;quot;,&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/mozjs&amp;quot;,&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/rust-mozjs&amp;quot;,&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/rust-png&amp;quot;,&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/glutin&amp;quot;&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;]&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;EOF&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -145,17 +162,28 @@ git submodule update
 
 &lt;p&gt;Now that we have set up the build system, we can get the updated dependencies like this:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p freetype-sys
-./mach cargo-update -p skia
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p azure           &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+./mach cargo-update -p fontconfig-sys  &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+./mach cargo-update -p freetype-sys    &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+./mach cargo-update -p mozjs_sys       &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+./mach cargo-update -p js              &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+./mach cargo-update -p png-sys         &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+./mach cargo-update -p skia            &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p stb_image&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;  &lt;/p&gt;
 
 &lt;div class=&quot;note&quot;&gt;
 
   &lt;p&gt;You can also specify a target Git hash for each package with the &lt;code&gt;--precise&lt;/code&gt; flag. At the time of writing,&lt;/p&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p freetype-sys --precise 39b368440712818ce8b071daf04d73541640de6b
-./mach cargo-update -p skia --precise 7a2ce925644274b8468099c3900425a9349757eb
-./mach cargo-update -p stb_image --precise 2235148b8230828ac0b96291def283e82fc4cfdd&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p azure --precise 0ee76c98d92b0ff180f8b4474c4f4b7c80b67ecf
+./mach cargo-update -p fontconfig-sys --precise b01ee3e2f8523a6566b8e5d406a2176ccb574060
+./mach cargo-update -p freetype-sys --precise 23b2ebba10639716c8f9e37945ee37dacc68b195
+./mach cargo-update -p mozjs_sys --precise 290ae28abec5a3f2bdc7ed8508ce02f86ac2c3e4
+./mach cargo-update -p js --precise 5da854e637fcfeefe4aebda0b66fc2406ea7dc63
+./mach cargo-update -p png-sys --precise a3569ca11ea54e5d6152ee80d7d39b2799700dbf
+./mach cargo-update -p skia --precise 0e2cc56c36ca08371777e11be018d93d2a877881
+./mach cargo-update -p stb_image --precise ddb122381df6249f7916c3cdadd9f42396d36602&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
   &lt;p&gt;can also be used for getting the latest versions.&lt;/p&gt;
 
