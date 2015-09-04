@@ -66,9 +66,21 @@
 
   <p><strong>UPDATE 2:</strong> Most of the patches have landed, post updated.</p>
 
+  <p><strong>UPDATE 3:</strong> The linker issue is now fixed (but, unfortunately there is an <a href="https://github.com/servo/skia/issues/68">issue</a> with the latest Skia).</p>
+
 </div>
 
 <p>For reference, in this post I’m going to use Servo at commit <a href="https://github.com/servo/servo/commit/73b52c095a448116c0f9db23894a0932d0d53484">73b52c0</a>, which requires Rust version <code>2d0cbf3e3e25e092bd9e4c94d08e446b680869f0</code>. You will need the Rust standart library of this version, compiled to ARM. Unfortunately, you will probably have to build that yourself too, as it’s not distributed with Rust yet. The first part of the <a href="https://github.com/servo/servo/wiki/Building-on-ARM-desktop-Linux">on-board building guide</a> describes how to do it. You will also need the ARM system libraries, but you can copy them either from the distribution running on your board or from a downloaded system installer, eg. a Raspbian image.</p>
+
+<script type="text/javascript">
+function toggleOldcontent(id) {
+  var elem = document.getElementById(id);
+  if (elem.style.display == "none")
+    elem.style.display = "block";
+  else
+    elem.style.display = "none";
+}
+</script>
 
 <h2 id="setting-up-a-rootfs">Setting up a rootfs</h2>
 
@@ -136,21 +148,9 @@ curl -LO https://github.com/servo/glutin/pull/32.diff <span class="o">&amp;&amp;
 git apply 32.diff <span class="o">&amp;&amp;</span> <span class="se">\</span>
 <span class="nb">cd</span> ..</code></pre></div>
 
-<script type="text/javascript">
-function toggleOldcontent() {
-  var oldies = document.getElementsByClassName("oldcontent");
-  for (var i = 0; i < oldies.length; i++) {
-    if (oldies[i].style.display == "none")
-      oldies[i].style.display = "block";
-    else
-      oldies[i].style.display = "none";
-  }
-}
-</script>
+<p><a href="javascript:toggleOldcontent('oldpatches')">+ Show already landed patches</a></p>
 
-<p><a href="javascript:toggleOldcontent()">+ Show already landed patches</a></p>
-
-<div class="note oldcontent" style="display:none">
+<div id="oldpatches" class="note oldcontent" style="display:none">
 
   <p>These patches have already landed, you can get them by <code>mach cargo-update</code> (see later), or manually:</p>
 
@@ -217,7 +217,7 @@ git submodule update
 ./mach cargo-update -p png-sys         <span class="o">&amp;&amp;</span> <span class="se">\</span>
 ./mach cargo-update -p skia            <span class="o">&amp;&amp;</span> <span class="se">\</span>
 ./mach cargo-update -p stb_image</code></pre></div>
-<p>  </p>
+<p></p>
 
 <div class="note">
 
@@ -288,25 +288,43 @@ sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabih
 <span class="nv">RANLIB</span><span class="o">=</span>arm-linux-gnueabihf-ranlib <span class="se">\</span>
 ./mach build --target<span class="o">=</span>arm-unknown-linux-gnueabihf --dev</code></pre></div>
 
-<p>should give you</p>
+<p>should build servo correctly, and you can find it at <code>./target/arm-unknown-linux-gnueabihf/debug/servo</code>. Congratulations!</p>
 
-<p><img src="https://mmatyas.github.io/blog/assets/servocross_linkererror.png" alt="Servo linking error" /></p>
+<p><a href="javascript:toggleOldcontent('linkererror')">+ Show the old linker error</a></p>
 
-<p>… a huge linker error. Don’t worry, we’ll fix this. <a href="https://github.com/servo/servo/issues/6483">It seems</a> this is also a packaging problem on Ubuntu; some X11 linker flags are missing, and you will have to add them manually. Copy the failing command (starting from <code>"arm-linux-gnueabihf-gcc" "-Wl,--as-needed" "-L" ...</code> to <code>... "c" "-l" "m" "-l" "compiler-rt"</code>) to your favorite text editor, and first create a proper GCC command from it:</p>
+<div id="linkererror" class="note oldcontent" style="display:none">
 
-<ul>
-  <li>replace all <code>"-l" "</code> with <code>"-l</code></li>
-  <li>replace all <code>"-L" "</code> with <code>"-L</code></li>
-  <li>delete all <code>"</code></li>
-</ul>
+  <p>Finally! If you’ve followed the previous steps correctly, running</p>
 
-<p>And add these three flags to the end:</p>
+  <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">CC</span><span class="o">=</span>arm-linux-gnueabihf-gcc <span class="se">\</span>
+<span class="nv">CXX</span><span class="o">=</span>arm-linux-gnueabihf-g++ <span class="se">\</span>
+<span class="nv">CPP</span><span class="o">=</span><span class="s2">&quot;arm-linux-gnueabihf-gcc -E&quot;</span> <span class="se">\</span>
+<span class="nv">LD</span><span class="o">=</span>arm-linux-gnueabihf-ld <span class="se">\</span>
+<span class="nv">AR</span><span class="o">=</span>arm-linux-gnueabihf-ar <span class="se">\</span>
+<span class="nv">RANLIB</span><span class="o">=</span>arm-linux-gnueabihf-ranlib <span class="se">\</span>
+./mach build --target<span class="o">=</span>arm-unknown-linux-gnueabihf --dev</code></pre></div>
 
-<div class="highlight"><pre><code class="language-bash" data-lang="bash">-lXxf86vm -lXmu -lXcursor</code></pre></div>
+  <p>should give you</p>
 
-<p><img src="https://mmatyas.github.io/blog/assets/servocross_final.png" alt="Servo building final step" /></p>
+  <p><img src="https://mmatyas.github.io/blog/assets/servocross_linkererror.png" alt="Servo linking error" /></p>
 
-<p>If you’re lucky, Servo will now build correctly and you can find it at <code>./target/arm-unknown-linux-gnueabihf/debug/servo</code>. Congratulations!</p>
+  <p>… a huge linker error. Don’t worry, we’ll fix this. <a href="https://github.com/servo/servo/issues/6483">It seems</a> this is also a packaging problem on Ubuntu; some X11 linker flags are missing, and you will have to add them manually. Copy the failing command (starting from <code>"arm-linux-gnueabihf-gcc" "-Wl,--as-needed" "-L" ...</code> to <code>... "c" "-l" "m" "-l" "compiler-rt"</code>) to your favorite text editor, and first create a proper GCC command from it:</p>
+
+  <ul>
+    <li>replace all <code>"-l" "</code> with <code>"-l</code></li>
+    <li>replace all <code>"-L" "</code> with <code>"-L</code></li>
+    <li>delete all <code>"</code></li>
+  </ul>
+
+  <p>And add these three flags to the end:</p>
+
+  <div class="highlight"><pre><code class="language-bash" data-lang="bash">-lXxf86vm -lXmu -lXcursor</code></pre></div>
+
+  <p><img src="https://mmatyas.github.io/blog/assets/servocross_final.png" alt="Servo building final step" /></p>
+
+  <p>If you’re lucky, Servo will now build correctly and you can find it at <code>./target/arm-unknown-linux-gnueabihf/debug/servo</code>. Congratulations!</p>
+
+</div>
 
 <h2 id="issues">Issues</h2>
 
