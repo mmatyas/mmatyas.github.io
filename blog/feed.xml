@@ -5,8 +5,8 @@
     <description></description>
     <link>https://mmatyas.github.io/blog/</link>
     <atom:link href="https://mmatyas.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Fri, 04 Sep 2015 11:26:35 +0200</pubDate>
-    <lastBuildDate>Fri, 04 Sep 2015 11:26:35 +0200</lastBuildDate>
+    <pubDate>Mon, 02 Nov 2015 19:06:22 +0100</pubDate>
+    <lastBuildDate>Mon, 02 Nov 2015 19:06:22 +0100</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -21,9 +21,17 @@
 
   &lt;p&gt;&lt;strong&gt;UPDATE 3:&lt;/strong&gt; The linker issue is now fixed (but, unfortunately there is an &lt;a href=&quot;https://github.com/servo/skia/issues/68&quot;&gt;issue&lt;/a&gt; with the latest Skia).&lt;/p&gt;
 
+  &lt;p&gt;&lt;strong&gt;UPDATE 4:&lt;/strong&gt; Looks like the Skia issue was fixed, but another appeared in &lt;code&gt;libexpat&lt;/code&gt;. Fortunately, there is a clean workaround for that.&lt;/p&gt;
+
+  &lt;p&gt;Last update: 2015, Nov 2&lt;/p&gt;
+
 &lt;/div&gt;
 
-&lt;p&gt;For reference, in this post I’m going to use Servo at commit &lt;a href=&quot;https://github.com/servo/servo/commit/73b52c095a448116c0f9db23894a0932d0d53484&quot;&gt;73b52c0&lt;/a&gt;, which requires Rust version &lt;code&gt;2d0cbf3e3e25e092bd9e4c94d08e446b680869f0&lt;/code&gt;. You will need the Rust standart library of this version, compiled to ARM. Unfortunately, you will probably have to build that yourself too, as it’s not distributed with Rust yet. The first part of the &lt;a href=&quot;https://github.com/servo/servo/wiki/Building-on-ARM-desktop-Linux&quot;&gt;on-board building guide&lt;/a&gt; describes how to do it. You will also need the ARM system libraries, but you can copy them either from the distribution running on your board or from a downloaded system installer, eg. a Raspbian image.&lt;/p&gt;
+&lt;p&gt;For reference, in this post I’m going to use Servo at commit &lt;a href=&quot;https://github.com/servo/servo/commit/73b52c095a448116c0f9db23894a0932d0d53484&quot;&gt;73b52c0&lt;/a&gt;, which requires Rust version &lt;code&gt;2d0cbf3e3e25e092bd9e4c94d08e446b680869f0&lt;/code&gt;. You will need the Rust standart library of &lt;em&gt;this&lt;/em&gt; particular version, compiled to ARM. The required version is stored in the file &lt;a href=&quot;https://github.com/servo/servo/blob/master/rust-snapshot-hash&quot;&gt;&lt;code&gt;rust-snapshot-hash&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, you will probably have to build that yourself too, as ARM libs are not distributed with Rust yet. The first part of the &lt;a href=&quot;https://github.com/servo/servo/wiki/Building-on-ARM-desktop-Linux&quot;&gt;on-board building guide&lt;/a&gt; describes how to do it. &lt;strong&gt;UPDATE&lt;/strong&gt;: Now you should also be able to compile it by simply setting the appropriate &lt;code&gt;configure&lt;/code&gt; flags.&lt;/p&gt;
+
+&lt;p&gt;You will also need the ARM system libraries, but you can copy them either from the system running on your board or from a downloaded distribution installer, eg. a Raspbian image.&lt;/p&gt;
 
 &lt;script type=&quot;text/javascript&quot;&gt;
 function toggleOldcontent(id) {
@@ -88,24 +96,26 @@ sudo python setup.py install&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;updating-dependencies&quot;&gt;Updating dependencies&lt;/h2&gt;
 
-&lt;p&gt;I’ve just pushed some ARM patches to Servo and its dependencies, which have not landed yet. Fortunately, we can use custom versions of these repos without messing up the main Servo (Cargo) directory, so we can apply these changes already.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;UPDATE:&lt;/strong&gt; Most dependencies work correctly now&lt;/p&gt;
 
-&lt;p&gt;I’m going to store these git repositories in &lt;code&gt;servo_repos&lt;/code&gt;:&lt;/p&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;mkdir servo_repos &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;servo_repos&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;and download each dependency which have an unlanded patch and apply it:&lt;/p&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/glutin.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;glutin &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-curl -LO https://github.com/servo/glutin/pull/32.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-git apply 32.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;&lt;a href=&quot;javascript:toggleOldcontent('oldpatches')&quot;&gt;+ Show already landed patches&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;javascript:toggleOldcontent('oldpatches')&quot;&gt;+ See the steps anyway&lt;/a&gt;&lt;/p&gt;
 
 &lt;div id=&quot;oldpatches&quot; class=&quot;note oldcontent&quot; style=&quot;display:none&quot;&gt;
 
-  &lt;p&gt;These patches have already landed, you can get them by &lt;code&gt;mach cargo-update&lt;/code&gt; (see later), or manually:&lt;/p&gt;
+  &lt;p&gt;I’ve just pushed some ARM patches to Servo and its dependencies, which have not landed yet. Fortunately, we can use custom versions of these repos without messing up the main Servo (Cargo) directory, so we can apply these changes already.&lt;/p&gt;
+
+  &lt;p&gt;I’m going to store these git repositories in &lt;code&gt;servo_repos&lt;/code&gt;:&lt;/p&gt;
+
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;mkdir servo_repos &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;servo_repos&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+  &lt;p&gt;and download each dependency which have an unlanded patch and apply it.&lt;/p&gt;
+
+  &lt;p&gt;&lt;strong&gt;UPDATE:&lt;/strong&gt;: These patches have already landed, you can get them by &lt;code&gt;mach cargo-update&lt;/code&gt; (see later), or manually:&lt;/p&gt;
+
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/glutin.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;glutin &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+curl -LO https://github.com/servo/glutin/pull/32.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+git apply 32.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
   &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/libexpat.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;libexpat &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 curl -LO https://github.com/servo/libexpat/pull/6.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
@@ -132,37 +142,37 @@ curl -LO https://github.com/servo/libfontconfig/pull/11.diff &lt;span class=&quo
 git apply 11.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;/div&gt;
+  &lt;p&gt;Now we have to create a &lt;a href=&quot;http://doc.crates.io/config.html&quot;&gt;Cargo config file&lt;/a&gt; for Servo to tell the location of these repos:&lt;/p&gt;
 
-&lt;p&gt;Now we have to create a &lt;a href=&quot;http://doc.crates.io/config.html&quot;&gt;Cargo config file&lt;/a&gt; for Servo to tell the location of these repos:&lt;/p&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ~/servo
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ~/servo
 mkdir .cargo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;cat &lt;span class=&quot;s&quot;&gt;&amp;lt;&amp;lt; &amp;#39;EOF&amp;#39; &amp;gt; .cargo/config&lt;/span&gt;
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;cat &lt;span class=&quot;s&quot;&gt;&amp;lt;&amp;lt; &amp;#39;EOF&amp;#39; &amp;gt; .cargo/config&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;paths = [&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/glutin&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/glutin&amp;quot;,&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/other-deps&amp;quot;,&lt;/span&gt;
+&lt;span class=&quot;s&quot;&gt;    ...&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;]&lt;/span&gt;
 &lt;span class=&quot;s&quot;&gt;EOF&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;This will solve the problem of unlanded patches. Now, some dependencies have ARM cross compile patches already, but Servo doesn’t use the latest version of these. To update them, we have to initialize the build system first:&lt;/p&gt;
+  &lt;p&gt;This will solve the problem of unlanded patches. Now, some dependencies have ARM cross compile patches already, but Servo doesn’t use the latest version of these. To update them, we have to initialize the build system first:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git submodule init
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git submodule init
 git submodule update
 ./mach bootstrap-rust
 ./mach bootstrap-cargo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;which will download Rust and Cargo used by Servo, and creates the directory structure to where we will copy the Rust libraries in the next section.&lt;/p&gt;
+  &lt;p&gt;which will download Rust and Cargo used by Servo, and creates the directory structure to where we will copy the Rust libraries in the next section.&lt;/p&gt;
 
-&lt;div class=&quot;note&quot;&gt;
+  &lt;div class=&quot;note&quot;&gt;
 
-  &lt;p&gt;Alternatively, you can just run &lt;code&gt;./mach build&lt;/code&gt;, which also does this for you, but the build itself will fail at this point.&lt;/p&gt;
+    &lt;p&gt;Alternatively, you can just run &lt;code&gt;./mach build&lt;/code&gt;, which also does this for you, but the build itself will fail at this point.&lt;/p&gt;
 
-&lt;/div&gt;
+  &lt;/div&gt;
 
-&lt;p&gt;Now that we have set up the build system, we can get the updated dependencies like this:&lt;/p&gt;
+  &lt;p&gt;Now that we have set up the build system, we can get the updated dependencies like this:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p azure           &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p azure           &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p fontconfig-sys  &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p freetype-sys    &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p mozjs_sys       &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
@@ -170,13 +180,12 @@ git submodule update
 ./mach cargo-update -p png-sys         &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p skia            &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p stb_image&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;&lt;/p&gt;
 
-&lt;div class=&quot;note&quot;&gt;
+  &lt;div class=&quot;note&quot;&gt;
 
-  &lt;p&gt;You can also specify a target Git hash for each package with the &lt;code&gt;--precise&lt;/code&gt; flag. At the time of writing,&lt;/p&gt;
+    &lt;p&gt;You can also specify a target Git hash for each package with the &lt;code&gt;--precise&lt;/code&gt; flag. At the time of writing,&lt;/p&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p azure --precise 0ee76c98d92b0ff180f8b4474c4f4b7c80b67ecf
+    &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p azure --precise 0ee76c98d92b0ff180f8b4474c4f4b7c80b67ecf
 ./mach cargo-update -p fontconfig-sys --precise b01ee3e2f8523a6566b8e5d406a2176ccb574060
 ./mach cargo-update -p freetype-sys --precise 23b2ebba10639716c8f9e37945ee37dacc68b195
 ./mach cargo-update -p mozjs_sys --precise 290ae28abec5a3f2bdc7ed8508ce02f86ac2c3e4
@@ -185,13 +194,22 @@ git submodule update
 ./mach cargo-update -p skia --precise 0e2cc56c36ca08371777e11be018d93d2a877881
 ./mach cargo-update -p stb_image --precise ddb122381df6249f7916c3cdadd9f42396d36602&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-  &lt;p&gt;can also be used for getting the latest versions.&lt;/p&gt;
+    &lt;p&gt;can also be used for getting the latest versions.&lt;/p&gt;
+
+  &lt;/div&gt;
 
 &lt;/div&gt;
 
+&lt;p&gt;What you still have to do, is setting up the build system:&lt;/p&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git submodule init
+git submodule update
+./mach bootstrap-rust
+./mach bootstrap-cargo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
 &lt;h2 id=&quot;installing-libraries&quot;&gt;Installing libraries&lt;/h2&gt;
 
-&lt;p&gt;We will need to install the Rust standart library for ARM if we want to cross compile programs written in Rust. Let’s exit from the rootfs for a minute:&lt;/p&gt;
+&lt;p&gt;We will need to install the &lt;strong&gt;Rust standart libraries for ARM&lt;/strong&gt; if we want to cross compile programs written in Rust. Let’s exit from the rootfs for a minute:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;    &lt;span class=&quot;c&quot;&gt;# log out from &amp;#39;servobuild&amp;#39;&lt;/span&gt;
 &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;    &lt;span class=&quot;c&quot;&gt;# log out from the rootfs&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -204,9 +222,13 @@ git submodule update
 
   &lt;p&gt;Note: Your target directory might have a different Rust hash/version.&lt;/p&gt;
 
+  &lt;p&gt;Note: In case you’ve skipped the preface, you have to build the Rust standard libraries of the version used by Servo for ARM&lt;/p&gt;
+
+  &lt;p&gt;If you skip this step, you will get &lt;code&gt;std&lt;/code&gt;-related errors when compiling Rust code&lt;/p&gt;
+
 &lt;/div&gt;
 
-&lt;p&gt;We will also need to install the ARM system libraries if we don’t want to get linker errors later:&lt;/p&gt;
+&lt;p&gt;We will also need to install the &lt;strong&gt;ARM system libraries&lt;/strong&gt; if we don’t want to get linker errors later:&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo cp -R path/to/your/lib/arm-linux-gnueabihf rootfs-trusty/lib/
 sudo cp -R path/to/your/usr/lib/arm-linux-gnueabihf rootfs-trusty/usr/lib/&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -225,7 +247,7 @@ su - servobuild
 
 &lt;p&gt;There are two ‘missing header’ errors, for OpenSSL and Zlib. Apparently this is a packaging issue on certain distros. Anyway, you can fix it like this:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;mkdir -p /usr/include/arm-linux-gnueabihf/
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo mkdir -p /usr/include/arm-linux-gnueabihf/
 sudo ln -s /usr/include/x86_64-linux-gnu/openssl /usr/include/arm-linux-gnueabihf/
 sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabihf/&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
@@ -233,7 +255,10 @@ sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabih
 
 &lt;p&gt;Finally! If you’ve followed the previous steps correctly, running&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;CC&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-gcc &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;PKG_CONFIG_ALLOW_CROSS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;PKG_CONFIG_PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/lib/arm-linux-gnueabihf/pkgconfig &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;EXPAT_NO_PKG_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;CC&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-gcc &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;CXX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-g++ &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;CPP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;arm-linux-gnueabihf-gcc -E&amp;quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;LD&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-ld &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
@@ -243,7 +268,7 @@ sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabih
 
 &lt;p&gt;should build servo correctly, and you can find it at &lt;code&gt;./target/arm-unknown-linux-gnueabihf/debug/servo&lt;/code&gt;. Congratulations!&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;javascript:toggleOldcontent('linkererror')&quot;&gt;+ Show the old linker error&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;javascript:toggleOldcontent('linkererror')&quot;&gt;+ Show the old linker errors&lt;/a&gt;&lt;/p&gt;
 
 &lt;div id=&quot;linkererror&quot; class=&quot;note oldcontent&quot; style=&quot;display:none&quot;&gt;
 
@@ -282,8 +307,6 @@ sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabih
 &lt;h2 id=&quot;issues&quot;&gt;Issues&lt;/h2&gt;
 
 &lt;p&gt;Servo still has some visual (X11 and OpenGL) problems on embedded Linux, whether you build on board or cross compile.&lt;/p&gt;
-
-&lt;p&gt;For some dependencies the ARM patches cause problems when you try to compile for Android. This is currently investigated. Meanwhile, you can just remove &lt;code&gt;.cargo/config&lt;/code&gt; to use the unpatched dependencies.&lt;/p&gt;
 </description>
         <pubDate>Fri, 03 Jul 2015 13:46:43 +0200</pubDate>
         <link>https://mmatyas.github.io/blog/cross-compiling-servo-to-arm</link>
