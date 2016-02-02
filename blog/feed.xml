@@ -5,9 +5,143 @@
     <description></description>
     <link>https://mmatyas.github.io/blog/</link>
     <atom:link href="https://mmatyas.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 02 Nov 2015 19:06:22 +0100</pubDate>
-    <lastBuildDate>Mon, 02 Nov 2015 19:06:22 +0100</lastBuildDate>
-    <generator>Jekyll v2.5.3</generator>
+    <pubDate>Tue, 02 Feb 2016 15:24:28 +0100</pubDate>
+    <lastBuildDate>Tue, 02 Feb 2016 15:24:28 +0100</lastBuildDate>
+    <generator>Jekyll v3.1.1</generator>
+    
+      <item>
+        <title>A short guide for cross-compiling Servo to ARM and AArch64</title>
+        <description>&lt;p&gt;This is a really short tutorial for cross compiling &lt;a href=&quot;https://github.com/servo/servo&quot;&gt;Servo&lt;/a&gt; to ARM and AArch64. For a more detailed guide, see &lt;a href=&quot;/cross-compiling-servo-to-arm&quot;&gt;my previous post&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;arm&quot;&gt;ARM&lt;/h2&gt;
+
+&lt;h3 id=&quot;preparations&quot;&gt;Preparations&lt;/h3&gt;
+
+&lt;p&gt;Get the compiler:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get install g++-arm-linux-gnueabihf&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;You will need the ARM system libs, either copy it from real hardware, or:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo qemu-debootstrap --arch&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;armhf --keyring&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/share/keyrings/ubuntu-archive-keyring.gpg --verbose wily rootfs-wily-armhf
+
+sudo chroot rootfs-wily-armhf &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    sudo apt-get install curl freeglut3-dev autoconf &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    libfreetype6-dev libgl1-mesa-dri libglib2.0-dev xorg-dev &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    gperf g++ build-essential cmake python &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    libssl-dev libbz2-dev libosmesa6-dev libxmu6 libxmu-dev &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    libglu1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev
+
+&lt;span class=&quot;c&quot;&gt;# Take a coffee&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# In case you want to save your libs:&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# tar czfv armhf-wily-libs.tgz -C rootfs-wily-arm64 usr/include/arm-linux-gnueabihf lib/arm-linux-gnueabihf usr/lib/arm-linux-gnueabihf&lt;/span&gt;
+
+sudo ln -s &lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;pwd&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;/rootfs-wily-armhf/usr/include/arm-linux-gnueabihf /usr/include/arm-linux-gnueabihf
+sudo ln -s &lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;pwd&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;/rootfs-wily-armhf/usr/lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf
+sudo ln -s &lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;pwd&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;/rootfs-wily-armhf/lib/arm-linux-gnueabihf /lib/arm-linux-gnueabihf&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;div class=&quot;note&quot;&gt;
+  &lt;p&gt;I’m on Ubuntu 15.10 (Wily), so I’m using &lt;code class=&quot;highlighter-rouge&quot;&gt;wily&lt;/code&gt; for debootstrap too. I guess you might have more luck if they match.&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Some dependencies search for the compiler with the &lt;code class=&quot;highlighter-rouge&quot;&gt;-unknown-&lt;/code&gt; vendor tag (eg. &lt;code class=&quot;highlighter-rouge&quot;&gt;arm-unknown-linux-gnueabihf&lt;/code&gt; instead of &lt;code class=&quot;highlighter-rouge&quot;&gt;arm-linux-gnueabihf&lt;/code&gt;), here is a quick fix for that:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;mkdir -p &lt;span class=&quot;nv&quot;&gt;$HOME&lt;/span&gt;/bin
+&lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;f &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; /usr/bin/arm-linux-&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;; &lt;span class=&quot;k&quot;&gt;do &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;f2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;basename &lt;span class=&quot;nv&quot;&gt;$f&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;; ln -s &lt;span class=&quot;nv&quot;&gt;$f&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$HOME&lt;/span&gt;/bin/&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;f2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;/-linux/-unknown-linux&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;; &lt;span class=&quot;k&quot;&gt;done
+&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$PATH&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$HOME&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/bin&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;building-servo&quot;&gt;Building Servo&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/servo.git
+&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;servo&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The Rust stdlibs for ARM and AArch64 aren’t downloaded automatically, here’s fix for that:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sed -i &lt;span class=&quot;s2&quot;&gt;&quot;s/stdlibs = &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;host_triple(), &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;arm-linux-androideabi&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;\]&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/stdlibs = set(&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;host_triple(), &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;arm-linux-androideabi&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;, &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;arm-unknown-linux-gnueabihf&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;, &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;aarch64-unknown-linux-gnu&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;\]&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;)/&quot;&lt;/span&gt; python/servo/bootstrap_commands.py&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now you can build:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;CC&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-gcc &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;CXX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-g++ &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;PKG_CONFIG_ALLOW_CROSS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;PKG_CONFIG_PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/lib/arm-linux-gnueabihf/pkgconfig &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+./mach build -r --target&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-unknown-linux-gnueabihf&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;aarch64&quot;&gt;AArch64&lt;/h2&gt;
+
+&lt;div class=&quot;note&quot;&gt;
+  &lt;p&gt;Yes, this will be mostly the same.&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;h3 id=&quot;preparations-1&quot;&gt;Preparations&lt;/h3&gt;
+
+&lt;p&gt;Get the compiler:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get install g++-aarch64-linux-gnu&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;You will need the ARM64 system libs, either copy it from real hardware, or:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo qemu-debootstrap --arch&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm64 --keyring&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/share/keyrings/ubuntu-archive-keyring.gpg --verbose wily rootfs-wily-arm64
+
+sudo chroot rootfs-wily-arm64 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    sudo apt-get install curl freeglut3-dev autoconf &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    libfreetype6-dev libgl1-mesa-dri libglib2.0-dev xorg-dev &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    gperf g++ build-essential cmake python &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    libssl-dev libbz2-dev libosmesa6-dev libxmu6 libxmu-dev &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+    libglu1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev
+
+&lt;span class=&quot;c&quot;&gt;# Coffee break!&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# In case you want to save your libs:&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# tar czfv arm64-wily-libs.tgz -C rootfs-wily-arm64 usr/include/aarch64-linux-gnu lib/aarch64-linux-gnu usr/lib/aarch64-linux-gnu&lt;/span&gt;
+
+sudo ln -s &lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;pwd&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;/rootfs-wily-arm64/usr/include/aarch64-linux-gnu /usr/include/aarch64-linux-gnu
+sudo ln -s &lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;pwd&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;/rootfs-wily-arm64/usr/lib/aarch64-linux-gnu /usr/lib/aarch64-linux-gnu
+sudo ln -s &lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;pwd&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;/rootfs-wily-arm64/lib/aarch64-linux-gnu /lib/aarch64-linux-gnu&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;div class=&quot;note&quot;&gt;
+  &lt;p&gt;I’m on Ubuntu 15.10 (Wily), so I’m using &lt;code class=&quot;highlighter-rouge&quot;&gt;wily&lt;/code&gt; for debootstrap too. I guess you might have more luck if they match.&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Some dependencies search for the compiler with the &lt;code class=&quot;highlighter-rouge&quot;&gt;-unknown-&lt;/code&gt; vendor tag (eg. &lt;code class=&quot;highlighter-rouge&quot;&gt;arm-unknown-linux-gnueabihf&lt;/code&gt; instead of &lt;code class=&quot;highlighter-rouge&quot;&gt;arm-linux-gnueabihf&lt;/code&gt;), here is a quick fix for that:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;mkdir -p &lt;span class=&quot;nv&quot;&gt;$HOME&lt;/span&gt;/bin
+&lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;f &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; /usr/bin/aarch64-linux-&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;; &lt;span class=&quot;k&quot;&gt;do &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;f2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;basename &lt;span class=&quot;nv&quot;&gt;$f&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;; ln -s &lt;span class=&quot;nv&quot;&gt;$f&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$HOME&lt;/span&gt;/bin/&lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;f2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;/-linux/-unknown-linux&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;; &lt;span class=&quot;k&quot;&gt;done
+&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$PATH&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$HOME&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/bin&quot;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h3 id=&quot;building-servo-1&quot;&gt;Building Servo&lt;/h3&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/servo.git
+&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;servo&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The Rust stdlibs for ARM and AArch64 aren’t downloaded automatically, here’s fix for that:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sed -i &lt;span class=&quot;s2&quot;&gt;&quot;s/stdlibs = &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;host_triple(), &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;arm-linux-androideabi&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;\]&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/stdlibs = set(&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;host_triple(), &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;arm-linux-androideabi&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;, &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;arm-unknown-linux-gnueabihf&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;, &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;aarch64-unknown-linux-gnu&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;\]&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;)/&quot;&lt;/span&gt; python/servo/bootstrap_commands.py&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now you can build:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;CC&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;aarch64-linux-gnu-gcc &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;CXX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;aarch64-linux-gnu-g++ &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;PKG_CONFIG_ALLOW_CROSS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;PKG_CONFIG_PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/lib/aarch64-linux-gnu/pkgconfig &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+./mach build -r --target&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;aarch64-unknown-linux-gnu&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+</description>
+        <pubDate>Tue, 02 Feb 2016 00:00:00 +0100</pubDate>
+        <link>https://mmatyas.github.io/blog/servo-short-cross-compilation-guide</link>
+        <guid isPermaLink="true">https://mmatyas.github.io/blog/servo-short-cross-compilation-guide</guid>
+        
+        
+        <category>servo</category>
+        
+        <category>crosscompile</category>
+        
+        <category>arm</category>
+        
+        <category>aarch64</category>
+        
+      </item>
     
       <item>
         <title>Cross-compiling Servo to ARM</title>
@@ -21,15 +155,15 @@
 
   &lt;p&gt;&lt;strong&gt;UPDATE 3:&lt;/strong&gt; The linker issue is now fixed (but, unfortunately there is an &lt;a href=&quot;https://github.com/servo/skia/issues/68&quot;&gt;issue&lt;/a&gt; with the latest Skia).&lt;/p&gt;
 
-  &lt;p&gt;&lt;strong&gt;UPDATE 4:&lt;/strong&gt; Looks like the Skia issue was fixed, but another appeared in &lt;code&gt;libexpat&lt;/code&gt;. Fortunately, there is a clean workaround for that.&lt;/p&gt;
+  &lt;p&gt;&lt;strong&gt;UPDATE 4:&lt;/strong&gt; Looks like the Skia issue was fixed, but another appeared in &lt;code class=&quot;highlighter-rouge&quot;&gt;libexpat&lt;/code&gt;. Fortunately, there is a clean workaround for that.&lt;/p&gt;
 
   &lt;p&gt;Last update: 2015, Nov 2&lt;/p&gt;
 
 &lt;/div&gt;
 
-&lt;p&gt;For reference, in this post I’m going to use Servo at commit &lt;a href=&quot;https://github.com/servo/servo/commit/73b52c095a448116c0f9db23894a0932d0d53484&quot;&gt;73b52c0&lt;/a&gt;, which requires Rust version &lt;code&gt;2d0cbf3e3e25e092bd9e4c94d08e446b680869f0&lt;/code&gt;. You will need the Rust standart library of &lt;em&gt;this&lt;/em&gt; particular version, compiled to ARM. The required version is stored in the file &lt;a href=&quot;https://github.com/servo/servo/blob/master/rust-snapshot-hash&quot;&gt;&lt;code&gt;rust-snapshot-hash&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;For reference, in this post I’m going to use Servo at commit &lt;a href=&quot;https://github.com/servo/servo/commit/73b52c095a448116c0f9db23894a0932d0d53484&quot;&gt;73b52c0&lt;/a&gt;, which requires Rust version &lt;code class=&quot;highlighter-rouge&quot;&gt;2d0cbf3e3e25e092bd9e4c94d08e446b680869f0&lt;/code&gt;. You will need the Rust standart library of &lt;em&gt;this&lt;/em&gt; particular version, compiled to ARM. The required version is stored in the file &lt;a href=&quot;https://github.com/servo/servo/blob/master/rust-snapshot-hash&quot;&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;rust-snapshot-hash&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;Unfortunately, you will probably have to build that yourself too, as ARM libs are not distributed with Rust yet. The first part of the &lt;a href=&quot;https://github.com/servo/servo/wiki/Building-on-ARM-desktop-Linux&quot;&gt;on-board building guide&lt;/a&gt; describes how to do it. &lt;strong&gt;UPDATE&lt;/strong&gt;: Now you should also be able to compile it by simply setting the appropriate &lt;code&gt;configure&lt;/code&gt; flags.&lt;/p&gt;
+&lt;p&gt;Unfortunately, you will probably have to build that yourself too, as ARM libs are not distributed with Rust yet. The first part of the &lt;a href=&quot;https://github.com/servo/servo/wiki/Building-on-ARM-desktop-Linux&quot;&gt;on-board building guide&lt;/a&gt; describes how to do it. &lt;strong&gt;UPDATE&lt;/strong&gt;: Now you should also be able to compile it by simply setting the appropriate &lt;code class=&quot;highlighter-rouge&quot;&gt;configure&lt;/code&gt; flags.&lt;/p&gt;
 
 &lt;p&gt;You will also need the ARM system libraries, but you can copy them either from the system running on your board or from a downloaded distribution installer, eg. a Raspbian image.&lt;/p&gt;
 
@@ -47,152 +181,152 @@ function toggleOldcontent(id) {
 
 &lt;p&gt;First, I’m going to set up an Ubuntu 14.04 rootfs to build in a clean environment. You can safely skip this step (just don’t forget to change the paths later).&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get install debootstrap
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get install debootstrap
 sudo debootstrap --arch&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;amd64 trusty rootfs-trusty
 sudo mount -o &lt;span class=&quot;nb&quot;&gt;bind&lt;/span&gt; /dev  rootfs-trusty/dev
 sudo mount -o &lt;span class=&quot;nb&quot;&gt;bind&lt;/span&gt; /proc rootfs-trusty/proc
 sudo mount -o &lt;span class=&quot;nb&quot;&gt;bind&lt;/span&gt; /sys  rootfs-trusty/sys
-sudo chroot rootfs-trusty /bin/bash&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+sudo chroot rootfs-trusty /bin/bash&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Then, add a new user inside the roots (again, you can skip this):&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;useradd -m servobuild -s /bin/bash
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;useradd -m servobuild -s /bin/bash
 passwd servobuild
 usermod -aG sudo servobuild
-su - servobuild&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+su - servobuild&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;h2 id=&quot;prerequisites&quot;&gt;Prerequisites&lt;/h2&gt;
 
 &lt;p&gt;All right, let’s install the ARM compiler. There are many kinds of toolchains (eg. optimized for a certain board, like the Raspberry Pi), but the default one is fine for me:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get update
-sudo apt-get install g++-arm-linux-gnueabihf&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get update
+sudo apt-get install g++-arm-linux-gnueabihf&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;Install the Servo dependencies (copied from the readme):&lt;/p&gt;
+&lt;p&gt;Install the Servo dependencies (copied from the &lt;a href=&quot;https://github.com/servo/servo/blob/master/README.md&quot;&gt;README&lt;/a&gt;):&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get install curl freeglut3-dev &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get install curl freeglut3-dev &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
     libfreetype6-dev libgl1-mesa-dri libglib2.0-dev xorg-dev &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
     gperf g++ cmake python-virtualenv &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-    libssl-dev libbz2-dev libosmesa6-dev libxmu6 libxmu-dev&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+    libssl-dev libbz2-dev libosmesa6-dev libxmu6 libxmu-dev&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;div class=&quot;note&quot;&gt;
 
-  &lt;p&gt;Note: if &lt;code&gt;python-virtualenv&lt;/code&gt; is not found, install it like this:&lt;/p&gt;
+  &lt;p&gt;Note: if &lt;code class=&quot;highlighter-rouge&quot;&gt;python-virtualenv&lt;/code&gt; is not found, install it like this:&lt;/p&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get install python-setuptools
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get install python-setuptools
 curl -O https://pypi.python.org/packages/source/v/virtualenv/virtualenv-13.0.3.tar.gz
 tar xzf virtualenv-13.0.3.tar.gz &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;virtualenv-13.0.3
-sudo python setup.py install&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+sudo python setup.py install&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;/div&gt;
 
 &lt;p&gt;Oh, and we will also need git:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get install git&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo apt-get install git&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;Finally, download Servo, but leave it alone for now:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/servo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/servo&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;h2 id=&quot;updating-dependencies&quot;&gt;Updating dependencies&lt;/h2&gt;
 
 &lt;p&gt;&lt;strong&gt;UPDATE:&lt;/strong&gt; Most dependencies work correctly now&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;javascript:toggleOldcontent('oldpatches')&quot;&gt;+ See the steps anyway&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;javascript:toggleOldcontent(&#39;oldpatches&#39;)&quot;&gt;+ See the steps anyway&lt;/a&gt;&lt;/p&gt;
 
 &lt;div id=&quot;oldpatches&quot; class=&quot;note oldcontent&quot; style=&quot;display:none&quot;&gt;
 
   &lt;p&gt;I’ve just pushed some ARM patches to Servo and its dependencies, which have not landed yet. Fortunately, we can use custom versions of these repos without messing up the main Servo (Cargo) directory, so we can apply these changes already.&lt;/p&gt;
 
-  &lt;p&gt;I’m going to store these git repositories in &lt;code&gt;servo_repos&lt;/code&gt;:&lt;/p&gt;
+  &lt;p&gt;I’m going to store these git repositories in &lt;code class=&quot;highlighter-rouge&quot;&gt;servo_repos&lt;/code&gt;:&lt;/p&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;mkdir servo_repos &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;servo_repos&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;mkdir servo_repos &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;servo_repos&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
   &lt;p&gt;and download each dependency which have an unlanded patch and apply it.&lt;/p&gt;
 
-  &lt;p&gt;&lt;strong&gt;UPDATE:&lt;/strong&gt;: These patches have already landed, you can get them by &lt;code&gt;mach cargo-update&lt;/code&gt; (see later), or manually:&lt;/p&gt;
+  &lt;p&gt;&lt;strong&gt;UPDATE:&lt;/strong&gt;: These patches have already landed, you can get them by &lt;code class=&quot;highlighter-rouge&quot;&gt;mach cargo-update&lt;/code&gt; (see later), or manually:&lt;/p&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/glutin.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;glutin &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/glutin.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;glutin &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 curl -LO https://github.com/servo/glutin/pull/32.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 git apply 32.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/libexpat.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;libexpat &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/libexpat.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;libexpat &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 curl -LO https://github.com/servo/libexpat/pull/6.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 git apply 6.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/mozjs.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;mozjs &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/mozjs.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;mozjs &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 curl -LO https://github.com/servo/mozjs/pull/48.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 git apply 48.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/rust-mozjs.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;rust-mozjs &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/rust-mozjs.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;rust-mozjs &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 curl -LO https://github.com/servo/rust-mozjs/pull/167.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 git apply 167.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/rust-png.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;rust-png &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/rust-png.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;rust-png &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 curl -LO https://github.com/servo/rust-png/pull/77.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 git apply 77.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/libfontconfig.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;libfontconfig &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git clone https://github.com/servo/libfontconfig.git &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;libfontconfig &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 curl -LO https://github.com/servo/libfontconfig/pull/11.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 git apply 11.diff &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ..&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
   &lt;p&gt;Now we have to create a &lt;a href=&quot;http://doc.crates.io/config.html&quot;&gt;Cargo config file&lt;/a&gt; for Servo to tell the location of these repos:&lt;/p&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ~/servo
-mkdir .cargo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; ~/servo
+mkdir .cargo&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;cat &lt;span class=&quot;s&quot;&gt;&amp;lt;&amp;lt; &amp;#39;EOF&amp;#39; &amp;gt; .cargo/config&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;paths = [&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/glutin&amp;quot;,&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;    &amp;quot;/home/servobuild/servo_repos/other-deps&amp;quot;,&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;    ...&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;]&lt;/span&gt;
-&lt;span class=&quot;s&quot;&gt;EOF&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;cat &lt;span class=&quot;sh&quot;&gt;&amp;lt;&amp;lt; &#39;EOF&#39; &amp;gt; .cargo/config
+paths = [
+    &quot;/home/servobuild/servo_repos/glutin&quot;,
+    &quot;/home/servobuild/servo_repos/other-deps&quot;,
+    ...
+]
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;EOF&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
   &lt;p&gt;This will solve the problem of unlanded patches. Now, some dependencies have ARM cross compile patches already, but Servo doesn’t use the latest version of these. To update them, we have to initialize the build system first:&lt;/p&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git submodule init
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git submodule init
 git submodule update
 ./mach bootstrap-rust
-./mach bootstrap-cargo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+./mach bootstrap-cargo&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
   &lt;p&gt;which will download Rust and Cargo used by Servo, and creates the directory structure to where we will copy the Rust libraries in the next section.&lt;/p&gt;
 
   &lt;div class=&quot;note&quot;&gt;
 
-    &lt;p&gt;Alternatively, you can just run &lt;code&gt;./mach build&lt;/code&gt;, which also does this for you, but the build itself will fail at this point.&lt;/p&gt;
+    &lt;p&gt;Alternatively, you can just run &lt;code class=&quot;highlighter-rouge&quot;&gt;./mach build&lt;/code&gt;, which also does this for you, but the build itself will fail at this point.&lt;/p&gt;
 
   &lt;/div&gt;
 
   &lt;p&gt;Now that we have set up the build system, we can get the updated dependencies like this:&lt;/p&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p azure           &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p azure           &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p fontconfig-sys  &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p freetype-sys    &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p mozjs_sys       &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p js              &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p png-sys         &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 ./mach cargo-update -p skia            &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-./mach cargo-update -p stb_image&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+./mach cargo-update -p stb_image&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
   &lt;div class=&quot;note&quot;&gt;
 
-    &lt;p&gt;You can also specify a target Git hash for each package with the &lt;code&gt;--precise&lt;/code&gt; flag. At the time of writing,&lt;/p&gt;
+    &lt;p&gt;You can also specify a target Git hash for each package with the &lt;code class=&quot;highlighter-rouge&quot;&gt;--precise&lt;/code&gt; flag. At the time of writing,&lt;/p&gt;
 
-    &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p azure --precise 0ee76c98d92b0ff180f8b4474c4f4b7c80b67ecf
+    &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;./mach cargo-update -p azure --precise 0ee76c98d92b0ff180f8b4474c4f4b7c80b67ecf
 ./mach cargo-update -p fontconfig-sys --precise b01ee3e2f8523a6566b8e5d406a2176ccb574060
 ./mach cargo-update -p freetype-sys --precise 23b2ebba10639716c8f9e37945ee37dacc68b195
 ./mach cargo-update -p mozjs_sys --precise 290ae28abec5a3f2bdc7ed8508ce02f86ac2c3e4
 ./mach cargo-update -p js --precise 5da854e637fcfeefe4aebda0b66fc2406ea7dc63
 ./mach cargo-update -p png-sys --precise a3569ca11ea54e5d6152ee80d7d39b2799700dbf
 ./mach cargo-update -p skia --precise 0e2cc56c36ca08371777e11be018d93d2a877881
-./mach cargo-update -p stb_image --precise ddb122381df6249f7916c3cdadd9f42396d36602&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+./mach cargo-update -p stb_image --precise ddb122381df6249f7916c3cdadd9f42396d36602&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
     &lt;p&gt;can also be used for getting the latest versions.&lt;/p&gt;
 
@@ -202,21 +336,21 @@ git submodule update
 
 &lt;p&gt;What you still have to do, is setting up the build system:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git submodule init
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;git submodule init
 git submodule update
 ./mach bootstrap-rust
-./mach bootstrap-cargo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+./mach bootstrap-cargo&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;h2 id=&quot;installing-libraries&quot;&gt;Installing libraries&lt;/h2&gt;
 
 &lt;p&gt;We will need to install the &lt;strong&gt;Rust standart libraries for ARM&lt;/strong&gt; if we want to cross compile programs written in Rust. Let’s exit from the rootfs for a minute:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;    &lt;span class=&quot;c&quot;&gt;# log out from &amp;#39;servobuild&amp;#39;&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;    &lt;span class=&quot;c&quot;&gt;# log out from the rootfs&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;    &lt;span class=&quot;c&quot;&gt;# log out from &#39;servobuild&#39;&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;    &lt;span class=&quot;c&quot;&gt;# log out from the rootfs&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;and copy your ARM Rust libraries to the correct location:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;cp -R path/to/your/rustc/lib/rustlib/arm-unknown-linux-gnueabihf rootfs-trusty/home/servobuild/servo/.servo/rust/2d0cbf3e3e25e092bd9e4c94d08e446b680869f0/rustc-1.2.0-dev-x86_64-unknown-linux-gnu/rustc/lib/rustlib/&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;cp -R path/to/your/rustc/lib/rustlib/arm-unknown-linux-gnueabihf rootfs-trusty/home/servobuild/servo/.servo/rust/2d0cbf3e3e25e092bd9e4c94d08e446b680869f0/rustc-1.2.0-dev-x86_64-unknown-linux-gnu/rustc/lib/rustlib/&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;div class=&quot;note&quot;&gt;
 
@@ -224,83 +358,83 @@ git submodule update
 
   &lt;p&gt;Note: In case you’ve skipped the preface, you have to build the Rust standard libraries of the version used by Servo for ARM&lt;/p&gt;
 
-  &lt;p&gt;If you skip this step, you will get &lt;code&gt;std&lt;/code&gt;-related errors when compiling Rust code&lt;/p&gt;
+  &lt;p&gt;If you skip this step, you will get &lt;code class=&quot;highlighter-rouge&quot;&gt;std&lt;/code&gt;-related errors when compiling Rust code&lt;/p&gt;
 
 &lt;/div&gt;
 
 &lt;p&gt;We will also need to install the &lt;strong&gt;ARM system libraries&lt;/strong&gt; if we don’t want to get linker errors later:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo cp -R path/to/your/lib/arm-linux-gnueabihf rootfs-trusty/lib/
-sudo cp -R path/to/your/usr/lib/arm-linux-gnueabihf rootfs-trusty/usr/lib/&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo cp -R path/to/your/lib/arm-linux-gnueabihf rootfs-trusty/lib/
+sudo cp -R path/to/your/usr/lib/arm-linux-gnueabihf rootfs-trusty/usr/lib/&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;div class=&quot;note&quot;&gt;
 
-  &lt;p&gt;If you are not working in a rootfs, just remove the &lt;code&gt;rootfs-trusty&lt;/code&gt; part of the commands.&lt;/p&gt;
+  &lt;p&gt;If you are not working in a rootfs, just remove the &lt;code class=&quot;highlighter-rouge&quot;&gt;rootfs-trusty&lt;/code&gt; part of the commands.&lt;/p&gt;
 
 &lt;/div&gt;
 
 &lt;p&gt;We’re done with the libraries, let’s go back into the rootfs:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo chroot rootfs-trusty /bin/bash
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo chroot rootfs-trusty /bin/bash
 su - servobuild
-&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;servo&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;servo&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;p&gt;There are two ‘missing header’ errors, for OpenSSL and Zlib. Apparently this is a packaging issue on certain distros. Anyway, you can fix it like this:&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo mkdir -p /usr/include/arm-linux-gnueabihf/
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;sudo mkdir -p /usr/include/arm-linux-gnueabihf/
 sudo ln -s /usr/include/x86_64-linux-gnu/openssl /usr/include/arm-linux-gnueabihf/
-sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabihf/&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include/arm-linux-gnueabihf/&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;h2 id=&quot;building&quot;&gt;Building!&lt;/h2&gt;
 
 &lt;p&gt;Finally! If you’ve followed the previous steps correctly, running&lt;/p&gt;
 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;PKG_CONFIG_ALLOW_CROSS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;PKG_CONFIG_ALLOW_CROSS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;PKG_CONFIG_PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/lib/arm-linux-gnueabihf/pkgconfig &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;EXPAT_NO_PKG_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;EXPAT_NO_PKG_CONFIG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1 &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;CC&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-gcc &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;CXX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-g++ &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;CPP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;arm-linux-gnueabihf-gcc -E&amp;quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;CPP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;arm-linux-gnueabihf-gcc -E&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;LD&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-ld &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;AR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-ar &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;RANLIB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-ranlib &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-./mach build --target&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-unknown-linux-gnueabihf --dev&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+./mach build --target&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-unknown-linux-gnueabihf --dev&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
-&lt;p&gt;should build servo correctly, and you can find it at &lt;code&gt;./target/arm-unknown-linux-gnueabihf/debug/servo&lt;/code&gt;. Congratulations!&lt;/p&gt;
+&lt;p&gt;should build servo correctly, and you can find it at &lt;code class=&quot;highlighter-rouge&quot;&gt;./target/arm-unknown-linux-gnueabihf/debug/servo&lt;/code&gt;. Congratulations!&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;javascript:toggleOldcontent('linkererror')&quot;&gt;+ Show the old linker errors&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;javascript:toggleOldcontent(&#39;linkererror&#39;)&quot;&gt;+ Show the old linker errors&lt;/a&gt;&lt;/p&gt;
 
 &lt;div id=&quot;linkererror&quot; class=&quot;note oldcontent&quot; style=&quot;display:none&quot;&gt;
 
   &lt;p&gt;Finally! If you’ve followed the previous steps correctly, running&lt;/p&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;CC&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-gcc &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;CC&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-gcc &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;CXX&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-g++ &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-&lt;span class=&quot;nv&quot;&gt;CPP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&amp;quot;arm-linux-gnueabihf-gcc -E&amp;quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;CPP&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;arm-linux-gnueabihf-gcc -E&quot;&lt;/span&gt; &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;LD&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-ld &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;AR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-ar &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;RANLIB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-linux-gnueabihf-ranlib &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
-./mach build --target&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-unknown-linux-gnueabihf --dev&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+./mach build --target&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;arm-unknown-linux-gnueabihf --dev&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
   &lt;p&gt;should give you&lt;/p&gt;
 
   &lt;p&gt;&lt;img src=&quot;https://mmatyas.github.io/blog/assets/servocross_linkererror.png&quot; alt=&quot;Servo linking error&quot; /&gt;&lt;/p&gt;
 
-  &lt;p&gt;… a huge linker error. Don’t worry, we’ll fix this. &lt;a href=&quot;https://github.com/servo/servo/issues/6483&quot;&gt;It seems&lt;/a&gt; this is also a packaging problem on Ubuntu; some X11 linker flags are missing, and you will have to add them manually. Copy the failing command (starting from &lt;code&gt;&quot;arm-linux-gnueabihf-gcc&quot; &quot;-Wl,--as-needed&quot; &quot;-L&quot; ...&lt;/code&gt; to &lt;code&gt;... &quot;c&quot; &quot;-l&quot; &quot;m&quot; &quot;-l&quot; &quot;compiler-rt&quot;&lt;/code&gt;) to your favorite text editor, and first create a proper GCC command from it:&lt;/p&gt;
+  &lt;p&gt;… a huge linker error. Don’t worry, we’ll fix this. &lt;a href=&quot;https://github.com/servo/servo/issues/6483&quot;&gt;It seems&lt;/a&gt; this is also a packaging problem on Ubuntu; some X11 linker flags are missing, and you will have to add them manually. Copy the failing command (starting from &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;arm-linux-gnueabihf-gcc&quot; &quot;-Wl,--as-needed&quot; &quot;-L&quot; ...&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;... &quot;c&quot; &quot;-l&quot; &quot;m&quot; &quot;-l&quot; &quot;compiler-rt&quot;&lt;/code&gt;) to your favorite text editor, and first create a proper GCC command from it:&lt;/p&gt;
 
   &lt;ul&gt;
-    &lt;li&gt;replace all &lt;code&gt;&quot;-l&quot; &quot;&lt;/code&gt; with &lt;code&gt;&quot;-l&lt;/code&gt;&lt;/li&gt;
-    &lt;li&gt;replace all &lt;code&gt;&quot;-L&quot; &quot;&lt;/code&gt; with &lt;code&gt;&quot;-L&lt;/code&gt;&lt;/li&gt;
-    &lt;li&gt;delete all &lt;code&gt;&quot;&lt;/code&gt;&lt;/li&gt;
+    &lt;li&gt;replace all &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;-l&quot; &quot;&lt;/code&gt; with &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;-l&lt;/code&gt;&lt;/li&gt;
+    &lt;li&gt;replace all &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;-L&quot; &quot;&lt;/code&gt; with &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;-L&lt;/code&gt;&lt;/li&gt;
+    &lt;li&gt;delete all &lt;code class=&quot;highlighter-rouge&quot;&gt;&quot;&lt;/code&gt;&lt;/li&gt;
   &lt;/ul&gt;
 
   &lt;p&gt;And add these three flags to the end:&lt;/p&gt;
 
-  &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;-lXxf86vm -lXmu -lXcursor&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+  &lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;-lXxf86vm -lXmu -lXcursor&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
   &lt;p&gt;&lt;img src=&quot;https://mmatyas.github.io/blog/assets/servocross_final.png&quot; alt=&quot;Servo building final step&quot; /&gt;&lt;/p&gt;
 
-  &lt;p&gt;If you’re lucky, Servo will now build correctly and you can find it at &lt;code&gt;./target/arm-unknown-linux-gnueabihf/debug/servo&lt;/code&gt;. Congratulations!&lt;/p&gt;
+  &lt;p&gt;If you’re lucky, Servo will now build correctly and you can find it at &lt;code class=&quot;highlighter-rouge&quot;&gt;./target/arm-unknown-linux-gnueabihf/debug/servo&lt;/code&gt;. Congratulations!&lt;/p&gt;
 
 &lt;/div&gt;
 

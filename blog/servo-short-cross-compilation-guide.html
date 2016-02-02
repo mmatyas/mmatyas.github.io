@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>A short guide for cross-compiling Servo to ARM and AArch64</title>
+  <meta name="description" content="This is a really short tutorial for cross compiling Servo to ARM and AArch64. For a more detailed guide, see my previous post.">
+
+  <link rel="stylesheet" href="/blog/css/main.css">
+  <link rel="canonical" href="https://mmatyas.github.io/blog/servo-short-cross-compilation-guide">
+  <link rel="alternate" type="application/rss+xml" title="mmatyas.github.io" href="https://mmatyas.github.io/blog/feed.xml" />
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/blog/">mmatyas.github.io</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">A short guide for cross-compiling Servo to ARM and AArch64</h1>
+    <p class="post-meta">Feb 2, 2016</p>
+  </header>
+
+  <article class="post-content">
+    <p>This is a really short tutorial for cross compiling <a href="https://github.com/servo/servo">Servo</a> to ARM and AArch64. For a more detailed guide, see <a href="/cross-compiling-servo-to-arm">my previous post</a>.</p>
+
+<h2 id="arm">ARM</h2>
+
+<h3 id="preparations">Preparations</h3>
+
+<p>Get the compiler:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install g++-arm-linux-gnueabihf</code></pre></figure>
+
+<p>You will need the ARM system libs, either copy it from real hardware, or:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo qemu-debootstrap --arch<span class="o">=</span>armhf --keyring<span class="o">=</span>/usr/share/keyrings/ubuntu-archive-keyring.gpg --verbose wily rootfs-wily-armhf
+
+sudo chroot rootfs-wily-armhf <span class="se">\</span>
+    sudo apt-get install curl freeglut3-dev autoconf <span class="se">\</span>
+    libfreetype6-dev libgl1-mesa-dri libglib2.0-dev xorg-dev <span class="se">\</span>
+    gperf g++ build-essential cmake python <span class="se">\</span>
+    libssl-dev libbz2-dev libosmesa6-dev libxmu6 libxmu-dev <span class="se">\</span>
+    libglu1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev
+
+<span class="c"># Take a coffee</span>
+
+<span class="c"># In case you want to save your libs:</span>
+<span class="c"># tar czfv armhf-wily-libs.tgz -C rootfs-wily-arm64 usr/include/arm-linux-gnueabihf lib/arm-linux-gnueabihf usr/lib/arm-linux-gnueabihf</span>
+
+sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/rootfs-wily-armhf/usr/include/arm-linux-gnueabihf /usr/include/arm-linux-gnueabihf
+sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/rootfs-wily-armhf/usr/lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf
+sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/rootfs-wily-armhf/lib/arm-linux-gnueabihf /lib/arm-linux-gnueabihf</code></pre></figure>
+
+<div class="note">
+  <p>I’m on Ubuntu 15.10 (Wily), so I’m using <code class="highlighter-rouge">wily</code> for debootstrap too. I guess you might have more luck if they match.</p>
+</div>
+
+<p>Some dependencies search for the compiler with the <code class="highlighter-rouge">-unknown-</code> vendor tag (eg. <code class="highlighter-rouge">arm-unknown-linux-gnueabihf</code> instead of <code class="highlighter-rouge">arm-linux-gnueabihf</code>), here is a quick fix for that:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir -p <span class="nv">$HOME</span>/bin
+<span class="k">for </span>f <span class="k">in</span> /usr/bin/arm-linux-<span class="k">*</span>; <span class="k">do </span><span class="nv">f2</span><span class="o">=</span><span class="k">$(</span>basename <span class="nv">$f</span><span class="k">)</span>; ln -s <span class="nv">$f</span> <span class="nv">$HOME</span>/bin/<span class="k">${</span><span class="nv">f2</span><span class="p">/-linux/-unknown-linux</span><span class="k">}</span>; <span class="k">done
+</span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PATH</span><span class="s2">:</span><span class="nv">$HOME</span><span class="s2">/bin"</span></code></pre></figure>
+
+<h3 id="building-servo">Building Servo</h3>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/servo.git
+<span class="nb">cd </span>servo</code></pre></figure>
+
+<p>The Rust stdlibs for ARM and AArch64 aren’t downloaded automatically, here’s fix for that:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sed -i <span class="s2">"s/stdlibs = </span><span class="se">\[</span><span class="s2">host_triple(), </span><span class="se">\"</span><span class="s2">arm-linux-androideabi</span><span class="se">\"\]</span><span class="s2">/stdlibs = set(</span><span class="se">\[</span><span class="s2">host_triple(), </span><span class="se">\"</span><span class="s2">arm-linux-androideabi</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">arm-unknown-linux-gnueabihf</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">aarch64-unknown-linux-gnu</span><span class="se">\"\]</span><span class="s2">)/"</span> python/servo/bootstrap_commands.py</code></pre></figure>
+
+<p>Now you can build:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">CC</span><span class="o">=</span>arm-linux-gnueabihf-gcc <span class="se">\</span>
+<span class="nv">CXX</span><span class="o">=</span>arm-linux-gnueabihf-g++ <span class="se">\</span>
+<span class="nv">PKG_CONFIG_ALLOW_CROSS</span><span class="o">=</span>1 <span class="se">\</span>
+<span class="nv">PKG_CONFIG_PATH</span><span class="o">=</span>/usr/lib/arm-linux-gnueabihf/pkgconfig <span class="se">\</span>
+./mach build -r --target<span class="o">=</span>arm-unknown-linux-gnueabihf</code></pre></figure>
+
+<h2 id="aarch64">AArch64</h2>
+
+<div class="note">
+  <p>Yes, this will be mostly the same.</p>
+</div>
+
+<h3 id="preparations-1">Preparations</h3>
+
+<p>Get the compiler:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo apt-get install g++-aarch64-linux-gnu</code></pre></figure>
+
+<p>You will need the ARM64 system libs, either copy it from real hardware, or:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sudo qemu-debootstrap --arch<span class="o">=</span>arm64 --keyring<span class="o">=</span>/usr/share/keyrings/ubuntu-archive-keyring.gpg --verbose wily rootfs-wily-arm64
+
+sudo chroot rootfs-wily-arm64 <span class="se">\</span>
+    sudo apt-get install curl freeglut3-dev autoconf <span class="se">\</span>
+    libfreetype6-dev libgl1-mesa-dri libglib2.0-dev xorg-dev <span class="se">\</span>
+    gperf g++ build-essential cmake python <span class="se">\</span>
+    libssl-dev libbz2-dev libosmesa6-dev libxmu6 libxmu-dev <span class="se">\</span>
+    libglu1-mesa-dev libgles2-mesa-dev libegl1-mesa-dev
+
+<span class="c"># Coffee break!</span>
+
+<span class="c"># In case you want to save your libs:</span>
+<span class="c"># tar czfv arm64-wily-libs.tgz -C rootfs-wily-arm64 usr/include/aarch64-linux-gnu lib/aarch64-linux-gnu usr/lib/aarch64-linux-gnu</span>
+
+sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/rootfs-wily-arm64/usr/include/aarch64-linux-gnu /usr/include/aarch64-linux-gnu
+sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/rootfs-wily-arm64/usr/lib/aarch64-linux-gnu /usr/lib/aarch64-linux-gnu
+sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/rootfs-wily-arm64/lib/aarch64-linux-gnu /lib/aarch64-linux-gnu</code></pre></figure>
+
+<div class="note">
+  <p>I’m on Ubuntu 15.10 (Wily), so I’m using <code class="highlighter-rouge">wily</code> for debootstrap too. I guess you might have more luck if they match.</p>
+</div>
+
+<p>Some dependencies search for the compiler with the <code class="highlighter-rouge">-unknown-</code> vendor tag (eg. <code class="highlighter-rouge">arm-unknown-linux-gnueabihf</code> instead of <code class="highlighter-rouge">arm-linux-gnueabihf</code>), here is a quick fix for that:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">mkdir -p <span class="nv">$HOME</span>/bin
+<span class="k">for </span>f <span class="k">in</span> /usr/bin/aarch64-linux-<span class="k">*</span>; <span class="k">do </span><span class="nv">f2</span><span class="o">=</span><span class="k">$(</span>basename <span class="nv">$f</span><span class="k">)</span>; ln -s <span class="nv">$f</span> <span class="nv">$HOME</span>/bin/<span class="k">${</span><span class="nv">f2</span><span class="p">/-linux/-unknown-linux</span><span class="k">}</span>; <span class="k">done
+</span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PATH</span><span class="s2">:</span><span class="nv">$HOME</span><span class="s2">/bin"</span></code></pre></figure>
+
+<h3 id="building-servo-1">Building Servo</h3>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/servo.git
+<span class="nb">cd </span>servo</code></pre></figure>
+
+<p>The Rust stdlibs for ARM and AArch64 aren’t downloaded automatically, here’s fix for that:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash">sed -i <span class="s2">"s/stdlibs = </span><span class="se">\[</span><span class="s2">host_triple(), </span><span class="se">\"</span><span class="s2">arm-linux-androideabi</span><span class="se">\"\]</span><span class="s2">/stdlibs = set(</span><span class="se">\[</span><span class="s2">host_triple(), </span><span class="se">\"</span><span class="s2">arm-linux-androideabi</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">arm-unknown-linux-gnueabihf</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">aarch64-unknown-linux-gnu</span><span class="se">\"\]</span><span class="s2">)/"</span> python/servo/bootstrap_commands.py</code></pre></figure>
+
+<p>Now you can build:</p>
+
+<figure class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">CC</span><span class="o">=</span>aarch64-linux-gnu-gcc <span class="se">\</span>
+<span class="nv">CXX</span><span class="o">=</span>aarch64-linux-gnu-g++ <span class="se">\</span>
+<span class="nv">PKG_CONFIG_ALLOW_CROSS</span><span class="o">=</span>1 <span class="se">\</span>
+<span class="nv">PKG_CONFIG_PATH</span><span class="o">=</span>/usr/lib/aarch64-linux-gnu/pkgconfig <span class="se">\</span>
+./mach build -r --target<span class="o">=</span>aarch64-unknown-linux-gnu</code></pre></figure>
+
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+  </body>
+
+</html>
