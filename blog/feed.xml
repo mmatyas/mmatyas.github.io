@@ -5,8 +5,8 @@
     <description></description>
     <link>https://mmatyas.github.io/blog/</link>
     <atom:link href="https://mmatyas.github.io/blog/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Tue, 02 Feb 2016 15:24:28 +0100</pubDate>
-    <lastBuildDate>Tue, 02 Feb 2016 15:24:28 +0100</lastBuildDate>
+    <pubDate>Thu, 04 Feb 2016 13:28:19 +0100</pubDate>
+    <lastBuildDate>Thu, 04 Feb 2016 13:28:19 +0100</lastBuildDate>
     <generator>Jekyll v3.1.1</generator>
     
       <item>
@@ -35,7 +35,7 @@ sudo chroot rootfs-wily-armhf &lt;span class=&quot;se&quot;&gt;\&lt;/span&gt;
 &lt;span class=&quot;c&quot;&gt;# Take a coffee&lt;/span&gt;
 
 &lt;span class=&quot;c&quot;&gt;# In case you want to save your libs:&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# tar czfv armhf-wily-libs.tgz -C rootfs-wily-arm64 usr/include/arm-linux-gnueabihf lib/arm-linux-gnueabihf usr/lib/arm-linux-gnueabihf&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# tar czfv armhf-wily-libs.tgz -C rootfs-wily-armhf usr/include/arm-linux-gnueabihf lib/arm-linux-gnueabihf usr/lib/arm-linux-gnueabihf&lt;/span&gt;
 
 sudo ln -s &lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;pwd&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;/rootfs-wily-armhf/usr/include/arm-linux-gnueabihf /usr/include/arm-linux-gnueabihf
 sudo ln -s &lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;pwd&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;/rootfs-wily-armhf/usr/lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf
