@@ -76,6 +76,12 @@
         text-align: center;
         margin: auto;
         line-height: 80px;
+        width: 100%;
+        float: left;
+      }
+
+      #statustext {
+        padding-left: 10px;
       }
 
       #progress {
@@ -103,7 +109,7 @@
   <body>
     <div id='buildinfo'>smw.js alpha, 2016 Mar 20</div>
     <div id='controls'><input type="button" value="Fullscreen" onclick="Module.requestFullScreen()"></div>
-    <div class="emscripten" id="status"><span class="spinner" id='spinner'></span> Downloading...</div>
+    <div id="status"><span class="spinner" id='spinner'></span><span id="statustext">Downloading...</span></div>
 
     <div class="emscripten">
       <progress value="0" max="100" id="progress" hidden=1></progress>
@@ -115,7 +121,7 @@
     </div>
 
     <script type='text/javascript'>
-      var statusElement = document.getElementById('status');
+      var statusElement = document.getElementById('statustext');
       var progressElement = document.getElementById('progress');
       var spinnerElement = document.getElementById('spinner');
 
