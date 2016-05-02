@@ -33,13 +33,13 @@
       </a>
 
       <div class="trigger">
-
-
-
-
-
-
-
+        
+          
+        
+          
+        
+          
+        
       </div>
     </nav>
 
@@ -58,7 +58,14 @@
   </header>
 
   <article class="post-content">
-    <p>This is a really short tutorial for cross compiling <a href="https://github.com/servo/servo">Servo</a> to ARM and AArch64. For a more detailed guide, see <a href="/blog/cross-compiling-servo-to-arm">my previous post</a>.</p>
+    <p>This is a really short tutorial for cross compiling <a href="https://github.com/servo/servo">Servo</a> to ARM and AArch64. For a more detailed guide, see <a href="/cross-compiling-servo-to-arm">my previous post</a>.</p>
+
+<p>Changelog:</p>
+
+<ul>
+  <li>2016 May 2: small updates</li>
+  <li>2016 Feb 2: original version</li>
+</ul>
 
 <h2 id="arm">ARM</h2>
 
@@ -89,7 +96,7 @@ sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)
 sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/rootfs-wily-armhf/lib/arm-linux-gnueabihf /lib/arm-linux-gnueabihf</code></pre></figure>
 
 <div class="note">
-  <p>I’m on Ubuntu 15.10 (Wily), so I’m using <code class="highlighter-rouge">wily</code> for debootstrap too. I guess you might have more luck if they match.</p>
+  <p>I’m on Ubuntu 15.10 (Wily), so I’m using <code class="highlighter-rouge">wily</code> for debootstrap too. I guess you might have more luck if they match. You can find <code class="highlighter-rouge">qemu-debootstrap</code> in <code class="highlighter-rouge">qemu-user-static</code>.</p>
 </div>
 
 <p>Some dependencies search for the compiler with the <code class="highlighter-rouge">-unknown-</code> vendor tag (eg. <code class="highlighter-rouge">arm-unknown-linux-gnueabihf</code> instead of <code class="highlighter-rouge">arm-linux-gnueabihf</code>), here is a quick fix for that:</p>
@@ -103,7 +110,7 @@ sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/servo.git
 <span class="nb">cd </span>servo</code></pre></figure>
 
-<p>The Rust stdlibs for ARM and AArch64 aren’t downloaded automatically, here’s fix for that:</p>
+<p><strong>UPDATE: This step is no longer needed.</strong> The Rust stdlibs for ARM and AArch64 aren’t downloaded automatically, here’s fix for that:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">sed -i <span class="s2">"s/stdlibs = </span><span class="se">\[</span><span class="s2">host_triple(), </span><span class="se">\"</span><span class="s2">arm-linux-androideabi</span><span class="se">\"\]</span><span class="s2">/stdlibs = set(</span><span class="se">\[</span><span class="s2">host_triple(), </span><span class="se">\"</span><span class="s2">arm-linux-androideabi</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">arm-unknown-linux-gnueabihf</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">aarch64-unknown-linux-gnu</span><span class="se">\"\]</span><span class="s2">)/"</span> python/servo/bootstrap_commands.py</code></pre></figure>
 
@@ -114,6 +121,10 @@ sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)
 <span class="nv">PKG_CONFIG_ALLOW_CROSS</span><span class="o">=</span>1 <span class="se">\</span>
 <span class="nv">PKG_CONFIG_PATH</span><span class="o">=</span>/usr/lib/arm-linux-gnueabihf/pkgconfig <span class="se">\</span>
 ./mach build -r --target<span class="o">=</span>arm-unknown-linux-gnueabihf</code></pre></figure>
+
+<div class="note">
+  <p>In case you get errors, delete your build (<code class="highlighter-rouge">./mach clean</code>), and add the following environment variables to the build command: <code class="highlighter-rouge">EXPAT_NO_PKG_CONFIG=1 FREETYPE2_NO_PKG_CONFIG=1 FONTCONFIG_NO_PKG_CONFIG=1</code></p>
+</div>
 
 <h2 id="aarch64">AArch64</h2>
 
@@ -148,7 +159,7 @@ sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)
 sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>/rootfs-wily-arm64/lib/aarch64-linux-gnu /lib/aarch64-linux-gnu</code></pre></figure>
 
 <div class="note">
-  <p>I’m on Ubuntu 15.10 (Wily), so I’m using <code class="highlighter-rouge">wily</code> for debootstrap too. I guess you might have more luck if they match.</p>
+  <p>I’m on Ubuntu 15.10 (Wily), so I’m using <code class="highlighter-rouge">wily</code> for debootstrap too. I guess you might have more luck if they match. You can find <code class="highlighter-rouge">qemu-debootstrap</code> in <code class="highlighter-rouge">qemu-user-static</code>.</p>
 </div>
 
 <p>Some dependencies search for the compiler with the <code class="highlighter-rouge">-unknown-</code> vendor tag (eg. <code class="highlighter-rouge">arm-unknown-linux-gnueabihf</code> instead of <code class="highlighter-rouge">arm-linux-gnueabihf</code>), here is a quick fix for that:</p>
@@ -162,7 +173,7 @@ sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">git clone https://github.com/servo/servo.git
 <span class="nb">cd </span>servo</code></pre></figure>
 
-<p>The Rust stdlibs for ARM and AArch64 aren’t downloaded automatically, here’s fix for that:</p>
+<p><strong>UPDATE: This step is no longer needed.</strong> The Rust stdlibs for ARM and AArch64 aren’t downloaded automatically, here’s fix for that:</p>
 
 <figure class="highlight"><pre><code class="language-bash" data-lang="bash">sed -i <span class="s2">"s/stdlibs = </span><span class="se">\[</span><span class="s2">host_triple(), </span><span class="se">\"</span><span class="s2">arm-linux-androideabi</span><span class="se">\"\]</span><span class="s2">/stdlibs = set(</span><span class="se">\[</span><span class="s2">host_triple(), </span><span class="se">\"</span><span class="s2">arm-linux-androideabi</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">arm-unknown-linux-gnueabihf</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">aarch64-unknown-linux-gnu</span><span class="se">\"\]</span><span class="s2">)/"</span> python/servo/bootstrap_commands.py</code></pre></figure>
 
@@ -174,6 +185,9 @@ sudo ln -s <span class="k">$(</span><span class="nb">pwd</span><span class="k">)
 <span class="nv">PKG_CONFIG_PATH</span><span class="o">=</span>/usr/lib/aarch64-linux-gnu/pkgconfig <span class="se">\</span>
 ./mach build -r --target<span class="o">=</span>aarch64-unknown-linux-gnu</code></pre></figure>
 
+<div class="note">
+  <p>In case you get errors, delete your build (<code class="highlighter-rouge">./mach clean</code>), and add the following environment variables to the build command: <code class="highlighter-rouge">EXPAT_NO_PKG_CONFIG=1 FREETYPE2_NO_PKG_CONFIG=1 FONTCONFIG_NO_PKG_CONFIG=1</code></p>
+</div>
 
   </article>
 

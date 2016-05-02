@@ -450,8 +450,14 @@ pre {
 
 div.note {
   width: 90%;
+  padding-top: 5px;
   padding-left: 5%;
-  border-left: 5px solid #3ae; }
+  padding-right: calc(5% - 6px);
+  border-left: 6px solid #3ae;
+  background-color: #f0f9fa; }
+
+div.note p {
+  padding-bottom: 5px; }
 
 strong {
   font-weight: bold; }
