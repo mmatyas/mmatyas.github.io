@@ -1,0 +1,3 @@
+[submodule "tools/adamatrix16x8"]
+	path = tools/adamatrix16x8
+	url = https://github.com/mmatyas/adamatrix16x8.git

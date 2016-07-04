@@ -29,7 +29,7 @@ a:hover, a:active {
 #main > div {
 	width: 40%;
 	padding: 20px;
-	padding-top: 0px;
+	padding-top: 10px;
 	padding-bottom: 15px;
 }
 
