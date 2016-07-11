@@ -15,6 +15,7 @@ body {
 a {
 	color: black;
 	text-decoration: none;
+	padding: 0px 3px;
 }
 
 a:hover, a:active {
@@ -57,4 +58,20 @@ a:hover, a:active {
 #right > div::first-line {
 	font-weight: 800;
 	text-transform: uppercase;
+}
+
+#clicky {
+	margin-top: 15px;
+	margin-right: -6px;
+}
+
+#clicky a {
+	padding: 0;
+	border-radius: 25%;
+}
+
+#clicky img {
+	width: 16px;
+	height: 16px;
+	margin: 0px 6px;
 }
