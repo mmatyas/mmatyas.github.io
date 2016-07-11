@@ -19,7 +19,7 @@ a {
 }
 
 a:hover, a:active {
-	background-color: lightgrey;
+	background-color: #e0e0e0;
 }
 
 #main {
