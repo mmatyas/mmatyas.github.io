@@ -107,8 +107,8 @@
     </style>
   </head>
   <body>
-    <div id='buildinfo'>smw.js alpha, 2016 Apr 3</div>
-    <div id='controls'><input type="button" value="Fullscreen" onclick="Module.requestFullScreen()"></div>
+    <div id='buildinfo'>smw.js alpha, 2020-06-10</div>
+    <div id='controls'><input type="button" value="Fullscreen" onclick="Module.requestFullscreen()"></div>
     <div id="status"><span class="spinner" id='spinner'></span><span id="statustext">Downloading...</span></div>
 
     <div class="emscripten">
@@ -184,23 +184,6 @@
         };
       };
     </script>
-    <script>
-        (function() {
-          var memoryInitializer = 'smw.html.mem';
-          if (typeof Module['locateFile'] === 'function') {
-            memoryInitializer = Module['locateFile'](memoryInitializer);
-          } else if (Module['memoryInitializerPrefixURL']) {
-            memoryInitializer = Module['memoryInitializerPrefixURL'] + memoryInitializer;
-          }
-          var xhr = Module['memoryInitializerRequest'] = new XMLHttpRequest();
-          xhr.open('GET', memoryInitializer, true);
-          xhr.responseType = 'arraybuffer';
-          xhr.send(null);
-        })();
-
-        var script = document.createElement('script');
-        script.src = "smw.js";
-        document.body.appendChild(script);
-    </script>
+    <script async src=smw.js></script>
   </body>
 </html>
