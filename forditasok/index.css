@@ -8,7 +8,8 @@ html {
 }
 body {
 	margin: auto;
-	width: 60%;
+	width: 800px;
+	max-width: 100%;
 }
 a {
 	text-decoration: underline;
@@ -17,7 +18,6 @@ a {
 img {
 	display: block;
 }
-
 
 
 nav {
@@ -48,7 +48,6 @@ img.project-logo {
 	padding: 2rem 0;
 	max-width: 100%;
 	height: 80px;
-	object-fit: cover;
 }
 
 .progress-box {
