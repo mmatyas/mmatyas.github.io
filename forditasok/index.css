@@ -21,6 +21,8 @@ a:hover {
 }
 img {
 	display: block;
+	max-width: 100%;
+	object-fit: contain;
 }
 
 
@@ -46,29 +48,41 @@ header h1 {
 }
 
 
-a.project-link {
-	display: block;
+a.project-btn {
+	display: flex;
+	flex-direction: column;
 	margin: 2rem 0;
+	padding: 16px 0;
 	text-align: center;
+	background-color: #fbf9f3;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	transition: box-shadow .2s;
+	text-decoration: none;
 }
-a.project-link p {
+a.project-btn .sub {
 	margin-top: .5em;
+	margin-bottom: 0;
 }
-
-img.project-logo {
-	margin: auto;
-	max-width: 100%;
+a.project-btn img {
 	height: 80px;
 }
+a.project-btn:hover {
+	box-shadow:0 8px 12px 0 rgba(0,0,0,.15), 0 10px 24px 0 rgba(0,0,0,.15)
+}
 
-section.intro {
+
+.project .logo {
+	margin: 0 auto;
+}
+.project .intro {
 	font-family: 'Merienda', sans-serif;
-	margin: 3rem auto;
+	margin: 4rem auto;
 	padding: .75rem calc(12% - 2rem);
 	border-left: 2rem solid #be8f3c;
 	background-color: #be8f3c20;
 }
-section.intro p {
+.project .intro p {
 	line-height: 1.4em;
 }
 
