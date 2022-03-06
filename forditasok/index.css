@@ -75,16 +75,10 @@ a.project-btn:hover {
 .project .logo {
 	margin: 0 auto;
 }
-.project .intro {
-	font-family: 'Merienda', sans-serif;
-	margin: 4rem auto;
-	padding: .75rem calc(12% - 2rem);
-	border-left: 2rem solid #be8f3c;
-	background-color: #be8f3c20;
+.project .hero {
+	margin: 3rem auto;
 }
-.project .intro p {
-	line-height: 1.4em;
-}
+
 
 .progress-box {
 	position: relative;
