@@ -10,13 +10,20 @@
 			text-align: center;
 			font-family: monospace;
 		}
+		button {
+			margin-bottom: 4em;
+		}
 	</style>
 </head>
 <body>
 
 <h1>JSON &rarr; LOCBIN</h1>
-<input id='locbin' type='file' accept='application/json'>
-<button id='convert'>Konvertálás</button>
+<input id='in-locbin' type='file' accept='application/json'>
+<button id='to-json'>Konvertálás</button>
+
+<h1>LOCBIN &rarr; JSON</h1>
+<input id='in-json' type='file' accept='application/octet-stream'>
+<button id='to-locbin'>Konvertálás</button>
 
 </body>
 </html>
