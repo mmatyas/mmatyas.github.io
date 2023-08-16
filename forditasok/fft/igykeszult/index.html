@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="hu-HU" xml:lang="hu-HU">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Mátyás Mustoha" />
+  <title>Final Fantasy Tactics, avagy az elvetemült fordító naplója</title>
+  <style>
+    html {
+      font-family: IBM Plex Serif;
+      line-height: 1.5;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 42em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height; auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-XBW7LQY62V"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XBW7LQY62V');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    h1, h2, h3 { hyphens: none; margin-bottom: 1rem; }
+    #title-block-header { display: none; }
+    img.width66 { max-width: 66%; display: block; margin: 0 auto; }
+    .right { text-align: right; }
+    .backlink { display: block; text-align: center; margin-top: 4em; }
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Final Fantasy Tactics, avagy az elvetemült fordító
+naplója</h1>
+<p class="author">Mátyás Mustoha</p>
+</header>
+<p><img src="fft_top.webp" alt="Képernyőkép" /></p>
+<h1 id="final-fantasy-tactics-avagy-az-elvetemült-fordító-naplója">Final
+Fantasy Tactics, avagy az elvetemült fordító naplója</h1>
+<p>Van úgy, hogy az ember befejez egy játékot, és érzi, hogy igen, ezt
+valakinek egyszer le kell fordítania magyarra. A lelkesedés persze
+legtöbbször csak fellángolás, de van, amikor éveken át kitart, egészen a
+célvonalig. Engem a <em>Final Fantasy Tactics</em>‑szal hozott össze így
+a sors.</p>
+<p>Mielőtt elmerülnénk a részletekben, egy kis háttér-információ. Az
+<em>FFT</em> eredetileg 1997‑ben jelent meg PlayStation 1‑re; a
+százgigás játékok korában már furcsa belegondolni, de ennek a gépnek
+konkrétan 2 (kettő) MB memóriája volt, plusz 1 MB az összes épp látható
+grafikus elemnek. Később majd látni fogjuk, hány helyen is köszön ez
+vissza a játék felépítésében.</p>
+<p><img src="psx.webp" class="width66" alt="Kép a PS1‑ről" /></p>
+<p>Tíz évvel később a játék kapott egy PSP‑s portot is, és ugyanez
+került tovább mobilokra is; ez lényegében megegyezik az eredetivel, ám
+egyes jelenetek átvezető videót kaptak, összecsaphatunk a barátainkkal,
+és néhány vendégszereplővel is találkozhatunk az út során.</p>
+<h2 id="a-forrásszöveg">A forrásszöveg</h2>
+<p>A PS1‑es korszakban a fordítás és a minőség-ellenőrzés még némileg
+gyerekcipőben járt, és ez meg is látszik a mai szemmel rémes, és sokszor
+hibáktól hemzsegő szövegeken. A PSP‑s változat egy új, már jóval
+színvonalasabb fordítást is kapott, a karaktereink nem csak helyesen, de
+a világhoz illő stílusban is szólalnak meg. Sajnos a fordítók kicsit át
+is estek a ló túloldalára, a nyelvezet néhol az olvashatóság kárára
+történik, és bizonyos „áthallásos” utalások is némileg tompítva
+lettek.</p>
+<p><img src="fft_geronimo4x3.webp" class="width66"
+alt="Kép a PS1‑es fordításról" /></p>
+<p>Ami mindkét fordításra igaz viszont, hogy a szöveg egy jelentős része
+egyszerűen hiányzik. A japán változatban négy olvasható, interaktív
+könyvet lehet összegyűjteni, amik a teljes játék szövegének kb. 15%-át
+tartalmazzák. Ezeket az angol változatban kikapcsolták és hivatalosan
+sosem fordították le.</p>
+<p>A fentiek miatt a fordítás elsősorban az eredeti japán szöveg alapján
+készült, a PSP‑s változatot megcélozva. Tervben volt, hogy PS1‑re is
+elkészítem, de végül memóriakorlátozások miatt (lásd később) ezt
+egyelőre inkább jegeltem.</p>
+<h2 id="kicsomagolás-becsomagolás">Kicsomagolás, becsomagolás</h2>
+<p>Ugye az ember általában azzal kezd egy ilyen projektet, hogy szétnéz
+az elérhető programok között, amivel belenyúlhat a játékba. A közösség
+pedig még ma is kifejezetten aktív a játék körül, fordítást azonban
+eddig nem sokan csináltak; és bár vannak programok arra, hogy az ember
+átírjon <em>pár</em> szöveget, arra azonban ezek messze nem voltak
+kényelmesek, hogy egy teljes körű honosítást csináljon velük az
+ember.</p>
+<p>Az évtizedek alatt felhalmozott tudás viszont rendkívül hasznosnak
+bizonyult később saját programok írásához. Vessünk is akkor egy
+pillantást a lemezekre.</p>
+<p>Fentebb említettem, hogy PS1‑en a memória erősen korlátozott; ezt a
+játékok általában úgy oldották meg, hogy menet közben a lemezről
+töltögették ki-be a játék kódját. PS1‑en így találunk is jó pár fájlt,
+ezek között pedig lesz majd egy erős átfedés a szövegben. PSP‑n viszont
+a videókon kívül mindössze két lényeges fájlt találunk, magát a kódot és
+az egész lemez tartalmát egyetlen adatfájlba nyomva. Ha az utóbbihoz
+írunk egy kicsomagolót, azt látjuk, hogy fájlnevek egyáltalán nincsenek
+benne. Szerencsére a tartalom nagyrészt megegyezik a PS1‑es lemezzel, ez
+alapján pedig a többségéről ki lehet találni, mi célt szolgál.</p>
+<h2 id="szöveg-és-ábécé">Szöveg és ábécé</h2>
+<p>Ha megvannak fájljaink, akkor nézzük a szöveget. A fordításhoz
+szükségem volt az eredi japán szöveg <em>tipográfiailag korrekt</em>
+exportálására: amikor egy rossz ecsetvonás megváltoztatja a szó
+jelentését, bizony oda kell figyelni, hogy az a 10x10 pixeles karakter
+mégis mi akar lenni. A lefordított szöveget ezután valahogy vissza is
+kell írni, és persze egy magyar ábécére is szükség lesz.</p>
+<p>’97‑ben az Unicode szabvány messze nem volt annyira elterjedt, főleg
+keleten, és így a játékok is hajlamosak voltak mindenféle egyedi
+megoldásokat használni. Itt sincs másképp, a szövegek egy egyedi, kb.
+2200 karakteres ábécét használnak, olyan kódolással, ami még az ASCII‑t
+sem követi. Ha ez nem volna elég, a különféle kiadásai a játéknak
+különböző kódolást használnak, továbbá a szövegek egy részén tömörítés
+is van. Bizonyos szövegrészek be vannak égetve a játék memóriájába,
+máshol az adott fájl nem lépheti át a lemez fizikai szektorméretét. A
+karakterszám tehát erősen kötött, és nem csak bájtban mérve: a szöveget
+kézzel kellett sorokba tördelni, és ha a magyar szöveg túl széles és
+lelóg a képernyőről, vagy több sora van, mint amennyit a játék vár,
+akkor nemes egyszerűséggel kifagy a játék az adott jelenetnél.</p>
+<p>Ha már szóba került az ábécé, ez egy nagy textúra, beégetve a
+memóriába, rajta apró kockákban a betűk. Mivel a játék nem követ
+semmilyen szabványos karakterkódolást, nekünk kell megmondanunk, hogy az
+egyes kis rajzok melyik betűt jelképezik az adott játékváltozatnál. Ez
+egyfajta párhuzamos munkát eredményezett: a jól látható betűk alapján ki
+tudtam exportálni <em>valamennyi</em> szöveget, ebből ki lehetett
+találni néhány kétes karaktert, amivel ismét újabb szövegeket tudtam
+exportálni, míg végül meg nem lett az egész szöveg.</p>
+<p><img src="fft_font.webp" class="width66"
+alt="Kép a font szerkesztőről" /></p>
+<p>Van még egy érdekes tulajdonsága a szövegeknek: a játék során a
+szereplők szövegbuborékokban beszélnek, és ennek a mérete nem az
+<em>aktuális</em> szöveghez illeszkedik, hanem az <em>összes</em>
+sorhoz, amit a karakter az adott buborékban mond. Azaz ha szép eredményt
+akarunk, tudnunk kell, ki, mikor, mekkora szövegbuborékban melyik
+szövegeket mondja, és úgy tördelni, hogy ezek mindegyike egyenletesen
+töltse ki a buborékot. Bár ilyesmivel hivatalos fordításban sem törődnek
+mindig (lásd GameBoy‑os <em>Fire Emblem</em>ek például), az ilyesmit
+azért meglátja az ember.</p>
+<p>No de hogyan próbáljuk ki az összes létező szöveget? Mivel egy 40+
+órás játékról beszélünk, ahol a döntéseink befolyásolhatják a
+párbeszédet, hagyományos módszerrel száz órákat el lehetett volna
+tölteni az összes döntési ág bejárásával. Gyorsabb (és érdekesebb) volt
+írni inkább egy mini emulátort a jelenetek bináris kódjához, amivel
+egyrészt azonnal láttam, melyik szöveg hol van és mekkora, másrészt pár
+kattintással tudtam a jelenetek között ugrálni, ami jelentősen
+gyorsította a munkát.</p>
+<p><img src="fft_evtdbg2.webp" alt="Kép az emulátorról" /></p>
+<p><img src="fft_evtdbg1.webp" alt="Kép az emulátorról" /></p>
+<p>(A bináris kódot úgy kell elképzelni, mint bájtok sorozatát, amik
+egy-egy parancsot jelentenek, például hogy hogyan forogjon a kamera egy
+párbeszéd során a karakterek körül. Ezeket „játssza le” később egymás
+után a játék.)</p>
+<p><img src="fft_binkod.webp" class="width66"
+alt="Kép a bináris kódról" /></p>
+<h2 id="textúrák">Textúrák</h2>
+<p>Az érdekes karakterkódolás mellett régebbi játékoknál a másik gyakori
+jelenség, hogy a szöveg jelentős része grafikus elem, azaz egy textúrára
+előre meg van rajzolva. Nehezítésképp itt a játék szinte minden része
+egyedi textúra formátumot vagy egyedi palettát használ:</p>
+<ul>
+<li>A bevezető szöveg textúra, és egy bináris kód dönti el, melyik
+sorokat rajzoljuk ki épp</li>
+<li>A fejezetek elején lévő felirat textúra, amit kettőbe vágva rajzol
+ki a játék</li>
+<li>A pályák nevei külön textúradarabok</li>
+<li>A harcok elején a győzelmi feltétel textúra, minden pályára külön,
+aminek a betűit egy bináris kód vágja ki és rakja össze</li>
+<li>A térképen a városok nevei szavakra vágva vannak keverten egy
+textúrán, amiket egy bináris kód vág ki és rak egymás mellé, pixelre
+pontosan, külön árnyékkezeléssel</li>
+</ul>
+<p><img src="fft_city.webp" alt="Kép a városok nevéről" /></p>
+<ul>
+<li>Az egységekre ható összes effekt és kis felirat (pl. „Mellé!”),
+valamint a menü szöveges ikonjai egy tucat különböző palettával vannak
+rajzolva, de egyetlen kis textúrán van összezsúfolva az összes</li>
+<li>Az olvasható könyvek szöveges textúrái ismét csak egyedi formátumban
+vannak egy külön fájlban</li>
+<li>És a kedvencem: PS1‑en a <em>Now loading</em> felirat betűi a
+harcban használt textúrából, más menüelemek betűiből van kirakva</li>
+</ul>
+<p>Hogy a játék melyik textúráról honnan vág ki egy darabot és hova
+rajzolja, az persze a játék kódjába van beégetve. Sok helyen ezt
+sikerült módosítani, máshol nem; itt tehát a magyar szövegnek pixelre
+pontosan bele kellett férnie az eredeti szöveg helyére.</p>
+<h2 id="és-minden-egyéb">És minden egyéb</h2>
+<p>Ha már vizuális elemek, nézzük a videókat. A PS1‑es változatban ebből
+nincs sok, PSP‑n viszont jó pár fontosabb jelenet kapott egyet. A japán
+változatban nincs szinkron, a szereplőink háttérzajok mellett tátognak,
+ami kissé különös hatást kelt, de bizonyára meg lehet szokni. Az angol
+szöveg azonban, és így a szinkron is, nem mindenhol követi szorosan az
+eredetit, ezért úgy kellett igazítani a szöveget is, hogy a beszéd
+ritmusához igyekezzen illeszkedni.</p>
+<p>A másik probléma, hogy néhány átvezetőnél a videóképre van égetve a
+felirat (és nem az alatta lévő fekete sávra). Itt a japán forrást sem
+lehetett egy az egyben használni, mert ott pedig tört angolsággal
+irkáltak a videóra; ezeket letakarítani a képkockákról elég
+időigényesnek bizonyult, de szerencsére nem sok ilyen videó volt
+végül.</p>
+<p><img src="fft_movie.webp" alt="Kép egy videóból" /></p>
+<p>Többször említettem, hogy a játék memóriájába és kódjába kellett
+belenyúlni. Bizonyos paraméterek egyszerűen beégetett értékek a
+játékban, és nem követik a szöveg szélességét. Ilyen például az összes
+menü és felugró üzenet szélessége; ha túl sok a szöveg, jobb esetben egy
+kicsit kilóg, rosszabb esetben eltűnik a többi szöveg vagy kifagy a
+játék. Nem mindenütt sikerült módosítani ezeket az értékeket, és nem is
+mindig egyértelmű, hogy melyik szövegdobozban épp melyik szöveget
+használja a játék, de amit megtaláltam, azt a szöveghez igazítottam.</p>
+<p>Két másik helyen lett még belenyúlva a kódba. Az egyik a PSP‑s
+„belassulás” javítása: mikor egy varázslatot vagy képességet használsz
+PSP‑n, a játék belassul (gyárilag, bármilyen módosítás nélkül, valódi
+PSP‑n). Egyszerűen rosszul van megírva itt a játék, de szerencsére a
+közösség megtalálta rá a megoldást, és ezt a fordítás is
+tartalmazza.</p>
+<p>A másik módosítás az olvasható könyvek bekapcsolása. Ahogy a
+bevezetőben írtam, a japán változatban négy olvasható, interaktív
+könyvet lehet összegyűjteni, amiket az angol változatban egyszerűen
+letiltottak. A honosítás mind a négyet visszakapcsolja és olvashatóvá
+teszi, immár magyarul. Angolul egyébként az első háromhoz készült
+rajongói fordítás még évekkel ezelőtt, de a negyedikhez valamiért nem,
+így úgy adódott, hogy ahhoz az angol fordítást is én csináltam
+végül.</p>
+<p><img src="fft_sn1.webp" alt="Kép egy videóból" /></p>
+<p>Legutolsónak még egy apróság volt hátra, a PSP‑s változatból ugyanis
+készült egy amerikai és egy európai kiadás is. Különbség a tartalomban
+nincs, de a játék egyedi azonosítója eltér a binárisokban, ezért hozzá
+kellett igazítanom a fordítás fájljait is.</p>
+<h2 id="zárszó">Zárszó</h2>
+<p>Sokat lehetne még írni, de azt hiszem, már így is hosszúra nyúlt ez a
+cikk. Valahogy sikerül mindig olyan játékba botlani, aminek a fordítása
+még elég sok fejlesztői munkát is igényel (lásd <em>What Remains of
+Edith Finch</em> vagy épp <em>FEZ</em>). Ám mikor ezek végre
+elkészülnek, elégedetten dőlhet hátra az ember: ez is meg lett
+csinálva.</p>
+<p>A <em>Final Fantasy Tactics</em> fordítása a PSP‑s változathoz immár
+elérhető a letöltések között, mind az amerikai, mind az európai
+változathoz. Jó játékot!</p>
+<p class="right">
+Mustoha Mátyás<br>2023. augusztus
+</p>
+<p><a href=".." class="backlink">Vissza</a></p>
+</body>
+</html>
