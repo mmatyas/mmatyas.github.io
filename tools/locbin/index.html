@@ -4,6 +4,7 @@
 	<meta charset='utf-8'>
 	<meta name='viewport' content='width=device-width, initial-scale=1'>
 	<title>JSON &rarr; LOCBIN</title>
+	<script src='jszip.min.js' defer></script>
 	<script src='app.min.js' defer></script>
 	<style>
 		body {
@@ -18,12 +19,12 @@
 <body>
 
 <h1>JSON &rarr; LOCBIN</h1>
-<input id='in-locbin' type='file' accept='application/json'>
-<button id='to-json'>Konvertálás</button>
+<input id='in-json' type='file' accept='application/json' multiple>
+<button id='to-locbin'>Konvertálás</button>
 
 <h1>LOCBIN &rarr; JSON</h1>
-<input id='in-json' type='file' accept='application/octet-stream'>
-<button id='to-locbin'>Konvertálás</button>
+<input id='in-locbin' type='file' accept='application/octet-stream' multiple>
+<button id='to-json'>Konvertálás</button>
 
 </body>
 </html>
