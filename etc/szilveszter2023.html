@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Szilveszter 2023</title>
+	<style>
+		body {
+			text-align: center;
+			padding: 2em 0;
+		}
+	</style>
+</head>
+<body>
+<button onclick='getRole()'>Kérek egy szerepet</button><br>
+<br>
+<button onclick='getCard()'>Kérek két új kártyát</button>
+<script>
+const ROLES = ['színész','földönkívüli','űrhajós','bébiszitter','bankrabló','naplopó','kéregető','jeti','koszorúslány','torreádor','kötélugró','hajótörött','konyhaséf','tréner','szénbányász','cowoy','kupidó','apuka','díva','orvos','kutya','fotómodell','halász','matekzseni','gladiátor','nagymama','kibukott középsulis','hippi','stoppos','csöves','bevándorló','alvajáró','vízimentő','hősszerelmes','favágó','masszőr','bandavezér','dadus','friss házas','újságkihordó','kalóz','pizzafutár','rendőr','politikus','várandós anyuka','pap','hercegnő','tüntető','királynő','rapper','játékvezető','hegymászó','szökevény','télapó','titkos hódoló','nyugdíjas','hóember','légiutas-kísérő','szuperhős','szörfös','tanár','miniszterelnök','terapeuta','csecsemő','kincsvadász','kamionos','festőművész','pultos','biciklis','milliárdos','kidobóember','barlanglakó','pompomlány','bohóc','humorista','kanapétöltelék','diktátor','kiképzőőrmester','hóhér','tűzoltó','jövendőmondó','hamiskártyás','gengszter','szellem','sírrabló','középiskolás','túsz','vadász','gondnok','az utolsó ember a Földön','ügyvéd','lottónyertes','őrült tudós','varázsló','szerzetes','temetkezési vállalkozó','nindzsa','nővér','atléta','paparazzi','partiállat','buliszervező','popdalénekes','hadifogoly','börtönőr','ökölvívó','lázadó','root','rocksztár','szobatárs','iskolabusz-vezető','katona','sportrajongó','sportcsapat kabalája','kém','helyettes tanár','közveszélyes sofőr','Tarzan','taxisofőr','tini','turista','vámpír','főgonosz','pincérnő','boszorkány','varrázsló','zombi','vízicsúszda-tesztelő','búvár','nyomozó','állateledel-kóstoló szakember','sörkóstoló','súlyemelő','pókerjátékos','elefántidomár','építészmérnök','gyógyító','dublőr','oroszlánszelídítő','menekült','csatornatisztító','terrorista'];
+const CARDS = ['sav','ébresztő','földönkívüli','düh','páncél','díj','szalonna','csali','banán','pult','kád','tengerpart','ágy','öv','bicikli','hólyag','tábla','bomba','bakancs','doboz','karperec','híd','buborék','haver','böffentő','fenék','gomb','kávé','gyertya','ágyu','kupak','kártya','tok','lánc','amulett','csirke','csokoládé','karom','óra','bunkósbot','érme','számítógép','süti','kanapé','krém','kristály','átok','tőr','bátorság','adósság','asztal','pelenka','kosz','adagoló','szamár','kétely','öltöny','nyál','trágya','fül','vészhelyzet','irigység','kifogás','arc','hiba','család','fantázia','sors','toll','filmszalag','hal','tűz','virág','hab','láb','szökőkút','barátság','temetés','pihe','kacat','ékkő','szellem','csillámpor','ragasztó','pletyka','sírhely','olaj','bánat','rágó','kalapács','kéz','harmonika','kalapács','szív','sisak','kapucni','hurok','szarv','ház','jég','rovar','befőtt','drágakő','öröm','szemét','csók','kiscica','létra','lámpa','nevetés','póráz','villám','szekrény','gép','ember','házasság','masszázs','hús','üzenet','csoda','köd','pénz','kedv','szúnyog','száj','korsó','zene','rejtély','tű','újság','zaj','óceán','sütő','evező','festék','nadrág','parádé','szenvedély','mancs','toll','parfüm','telefon','piknik','párna','szánalom','dugó','méreg','tó','fagyi','bili','tréfa','büszkeség','ígéret','pocsolya','sütőtök','tárca','radar','tutaj','eső','valóság','távirányító','szalag','folyó','robot','rodeó','gumi','zsák','saláta','műhold','virsli','iskola','sikoly','titok','szenzor','sampon','pajzs','ásó','jel','csont','koponya','szánkó','trutyi','füst','horkolás','szappan','dal','űr','pók','köpet','tavasz','csillag','pörkölt','zsámoly','kemence','utca','cukor','műtét','mocsár','hinta','szirup','fark','ragasztószalag','sokkoló','csapat','teleszkóp','terápia','trón','nyakkendő','lábujj','sírhalom','fáklya','törülköző','forgalom','trambulin','tálca','fa','trófea','bizalom','kád','daganat','tütü','esernyő','egyenruha','vakáció','gőz','mellény','inda','vitamin','köptető','pálca','enyv','ostor','szél','drót','munka','ásítás'];
+
+function getRole() {
+	const role = ROLES.splice(Math.floor(Math.random() * ROLES.length), 1);
+	alert(role);
+}
+function getCard() {
+	const card1 = CARDS.splice(Math.floor(Math.random() * CARDS.length), 1);
+	const card2 = CARDS.splice(Math.floor(Math.random() * CARDS.length), 1);
+	alert(card1 + '\n' + card2);
+}
+</script>
+</body>
+</html>
