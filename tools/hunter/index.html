@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>Hunter COTW StringLookup converter</title>
+    <script src='app.js.min' defer></script>
+    <style>
+        body {
+            text-align: center;
+            font-family: monospace;
+        }
+        section {
+            margin-bottom: 4em;
+        }
+        label {
+            text-align: right;
+            min-width: 150px;
+            display: inline-block;
+            margin: 0 .5em;
+        }
+        button, input {
+            margin: .2em;
+        }
+        button.convert {
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body>
+
+<section>
+    <h1>StringLookup &rarr; JSON</h1>
+    <label for='tojson-in'>Original file:</label><input id='tojson-in' type='file' accept='application/octet-stream'><br>
+    <button class='convert' id='tojson-btn'>Convert</button>
+</section>
+
+<section>
+    <h1>JSON &rarr; StringLookup</h1>
+    <label for='tobin-orig'>Original file:</label><input id='tobin-orig' type='file' accept='application/octet-stream'><br>
+    <label for='tobin-json'>Translated JSON:</label><input id='tobin-json' type='file' accept='application/json'><br>
+    <button class='convert' id='tobin-btn'>Convert</button>
+</section>
+
+</body>
+</html>
