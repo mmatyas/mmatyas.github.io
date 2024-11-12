@@ -4,6 +4,7 @@
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>SWBF2 DAT converter</title>
+    <script src="iconv.min.js" defer></script>
     <script src='app.min.js' defer></script>
     <style>
         body {
@@ -32,6 +33,11 @@
 <section>
     <h1>SWBF2 DAT &rarr; JSON</h1>
     <label for='tojson-in'>Original file:</label><input id='tojson-in' type='file' accept='application/octet-stream'><br>
+    <label for='tojson-codepage'>Original codepage:</label><select id='tojson-codepage'>
+        <option value='cp437'>CP437 (EN)</option>
+        <option value='windows-1252'>Windows 1252</option>
+        <option value='cp857'>CP857 (TR)</option>
+    </select><br>
     <button class='convert' id='tojson-btn'>Convert</button>
 </section>
 
@@ -39,6 +45,11 @@
     <h1>JSON &rarr; SWBF2 DAT</h1>
     <label for='tobin-orig'>Original file:</label><input id='tobin-orig' type='file' accept='application/octet-stream'><br>
     <label for='tobin-json'>Translated JSON:</label><input id='tobin-json' type='file' accept='application/json'><br>
+    <label for='tobin-codepage'>Output codepage:</label><select id='tobin-codepage'>
+        <option value='cp437'>CP437 (EN)</option>
+        <option value='windows-1252'>Windows 1252</option>
+        <option value='cp857'>CP857 (TR)</option>
+    </select><br>
     <button class='convert' id='tobin-btn'>Convert</button>
 </section>
 
