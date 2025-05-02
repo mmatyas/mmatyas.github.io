@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <title>KoARR converter</title>
+    <script src='app.min.js' defer></script>
+    <style>
+        body {
+            text-align: center;
+            font-family: monospace;
+        }
+        section {
+            margin-bottom: 4em;
+        }
+        label {
+            text-align: right;
+            min-width: 150px;
+            display: inline-block;
+            margin: 0 .5em;
+        }
+        button, input {
+            margin: .2em;
+        }
+        button.convert {
+            min-width: 150px;
+        }
+        hr {
+            max-width: 500px;
+            margin: 4em auto;
+        }
+    </style>
+</head>
+<body>
+
+<section>
+    <h2>affix &rarr; JSON</h2>
+    <label for='affix2json-in'>Original file:</label><input id='affix2json-in' type='file' accept='application/octet-stream'><br>
+    <button class='convert' id='affix2json-btn'>Convert</button>
+</section>
+
+<section>
+    <h2>JSON &rarr; affix</h2>
+    <label for='json2affix-orig'>Original file:</label><input id='json2affix-orig' type='file' accept='application/octet-stream'><br>
+    <label for='json2affix-json'>Translated JSON:</label><input id='json2affix-json' type='file' accept='application/json'><br>
+    <button class='convert' id='json2affix-btn'>Convert</button>
+</section>
+
+<hr>
+
+<section>
+    <h2>base &rarr; JSON</h2>
+    <label for='base2json-in'>Original file:</label><input id='base2json-in' type='file' accept='application/octet-stream'><br>
+    <button class='convert' id='base2json-btn'>Convert</button>
+</section>
+
+<section>
+    <h2>JSON &rarr; base</h2>
+    <label for='json2base-orig'>Original file:</label><input id='json2base-orig' type='file' accept='application/octet-stream'><br>
+    <label for='json2base-json'>Translated JSON:</label><input id='json2base-json' type='file' accept='application/json'><br>
+    <button class='convert' id='json2base-btn'>Convert</button>
+</section>
+
+<hr>
+
+<section>
+    <h2>default &rarr; JSON</h2>
+    <label for='default2json-in'>Original file:</label><input id='default2json-in' type='file' accept='application/octet-stream'><br>
+    <button class='convert' id='default2json-btn'>Convert</button>
+</section>
+
+<section>
+    <h2>JSON &rarr; default</h2>
+    <label for='json2default-orig'>Original file:</label><input id='json2default-orig' type='file' accept='application/octet-stream'><br>
+    <label for='json2default-json'>Translated JSON:</label><input id='json2default-json' type='file' accept='application/json'><br>
+    <button class='convert' id='json2default-btn'>Convert</button>
+</section>
+
+<hr>
+
+<section>
+    <h2>keys &rarr; JSON</h2>
+    <label for='keys2json-in'>Original file:</label><input id='keys2json-in' type='file' accept='application/octet-stream'><br>
+    <button class='convert' id='keys2json-btn'>Convert</button>
+</section>
+
+<section>
+    <h2>JSON &rarr; keys</h2>
+    <label for='json2keys-orig'>Original file:</label><input id='json2keys-orig' type='file' accept='application/octet-stream'><br>
+    <label for='json2keys-json'>Translated JSON:</label><input id='json2keys-json' type='file' accept='application/json'><br>
+    <button class='convert' id='json2keys-btn'>Convert</button>
+</section>
+
+</body>
+</html>
