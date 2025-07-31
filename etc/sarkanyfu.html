@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sárkányfű</title>
+    <style>
+        body {
+            text-align: center;
+            padding: 1em 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: sans-serif;
+        }
+        button {
+            margin: 1em;
+        }
+        #rules {
+            text-align: left;
+            max-width: 66ch;
+        }
+        #rules :first-child {
+            margin-top: 0;
+        }
+        #rules :last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+<button onclick='getCard()'>Kérek két új kártyát</button>
+<button onclick='getRole()'>Kezdőjátékos vagyok,<br>kérek egy szerepet</button>
+<button onclick='showRules()'>Szabályok</button>
+<dialog id='rules'>
+    <p><strong>Előkészítés:</strong> Mindenki húz magának 6 lapot (írd fel).</p>
+    <p>A kezdőjátékos, mint Vásárló, húz egy szerepet, és hangosan felolvassa.</p>
+    <p>A többi játékosnak 30–40 másodperce van 2 kártya kombinálásával kitalálni egy terméket, amit a Vásárló megvenne.</p>
+    <p>Ezután sorban haladva minden játékos megpróbálja „eladni” a terméket a vásárlónak. Ha mindenki sorra került, a vásárló kiválasztja a legjobb terméket, az eladó pedig kap egy pontot.</p>
+    <p>Az elhasznált lapok helyett mindenki húz 2 újat, és a következő játékosból lesz a Vásárló.</p>
+    <p><strong>Variáció 1:</strong> Azonnal kezdheted mondani, amint kitaláltad a terméket.<br><strong>Variáció 2:</strong> 8 vagy 10 szókártya.</p>
+</dialog>
+<script>
+const ROLES = ['színész','földönkívüli','űrhajós','bébiszitter','bankrabló','naplopó','kéregető','jeti','koszorúslány','torreádor','kötélugró','hajótörött','konyhaséf','tréner','szénbányász','cowboy','kupidó','apuka','díva','orvos','kutya','fotómodell','halász','matekzseni','gladiátor','nagymama','kibukott középsulis','hippi','stoppos','csöves','bevándorló','alvajáró','óvónéni/bácsi','vízimentő','hősszerelmes','favágó','masszőr','hittérítő','bandavezér','dadus','kommandós','friss házas','újságkihordó','fáraó','kalóz','pizzafutár','rendőr','politikus','várandós anyuka','pap','hercegnő','tüntető','királynő','rapper','játékvezető','hegymászó','szökevény','télapó','titkos hódoló','nyugdíjas','hóember','légiutas-kísérő','szuperhős','szörfös','tanár','miniszterelnök','terapeuta','csecsemő','kincsvadász','kamionos','festőművész','pultos','biciklis','milliárdos','kidobóember','túrázó','barlanglakó','pompomlány','bohóc','humorista','kanapétöltelék','diktátor','kiképzőőrmester','kukáskocsi-vezető','hóhér','tűzoltó','jövendőmondó','hamiskártyás','gengszter','szellem','sírrabló','horrorfilm-statiszta','középiskolás','túsz','vadász','gondnok','az utolsó ember a Földön','ügyvéd','Piroska','lottónyertes','őrült tudós','varázsló','szerzetes','temetkezési vállalkozó','nindzsa','nővér','atléta','paparazzi','partiállat','buliszervező','popdalénekes','hadifogoly','börtönőr','ökölvívó','lázadó','root','rocksztár','szobatárs','iskolabusz-vezető','katona','bolygóközi telepes','sportrajongó','sportcsapat kabalája','kém','helyettes tanár','közveszélyes sofőr','Tarzan','taxisofőr','tini','turista','vámpír','főgonosz','pincérnő','boszorkány','varrázsló','zombi','vízicsúszda-tesztelő','búvár','nyomozó','állateledel-kóstoló szakember','sörkóstoló','súlyemelő','pókerjátékos','elefántidomár','építészmérnök','gyógyító','dublőr','oroszlánszelídítő','menekült','csatornatisztító','terrorista'];
+const CARDS = ['sav','kaland','levegő','ébresztő','alkohol','riasztó','földönkívüli','horgony','angyal','düh','állat','antenna','páncél','művész','lavina','díj','balta','baba','szalonna','baktérium','zsák','csali','labda','lufi','banán','fejpánt','zászló','pult','barikád','kosár','kád','csata','rakétavető','tengerpart','füzér','szakáll','ágy','csengő','pocak','öv','bogyó','előke','bicikli','bikini','keksz','hólyag','takaró','turmixgép','léghajó','hóvihar','vér','tábla','hajó','test','bomba','csont','tábortűz','bakancs','könyv','bumeráng','doboz','palack','tál','karperec','karkötő','agy','tégla','híd','seprű','ecset','buborék','vödör','csat','haver','lövedék','nyuszi','böffentő','busz','bokor','fenék','vaj','lepke','gomb','berregő','kaktusz','kávé','ketrec','fényképező','gyertya','cukorka','bot','ágyu','kenu','menza','kupak','köpeny','autó','kártya','szőnyeg','répa','tok','katapult','barlang','lánc','szék','kréta','amulett','sajt','láda','csirke','csili','zseton','csokoládé','cirkusz','fogó','karom','szikla','palást','óra','felhő','bunkósbot','kabát','koporsó','érme','gallér','iránytű','számítógép','koncert','tölcsér','süti','hulla','jelmez','kanapé','kupon','krém','tömeg','korona','kristály','összebújós','csésze','átok','függöny','párna','tőr','tánc','veszély','bátorság','darts','halál','adósság','csali','vágy','asztal','érzékelő','gyémánt','pelenka','napló','dinoszaurusz','kosz','fegyelem','fertőzés','adagoló','játékbaba','delfin','szamár','végzet','ajtó','kétely','sárkány','álom','öltöny','fúró','drón','nyál','dob','kuka','trágya','tömlöc','por','fül','tojás','elefánt','vészhelyzet','energia','boríték','irigység','radír','menekülő','kifogás','gyakorlat','szem','arc','tény','gyár','hiba','tündér','hit','család','ventilátor','fantázia','tanya','sors','csap','félelem','toll','kerítés','láz','filmszalag','ujj','tűz','hal','fitnesz','láng','húz','virág','folyékony','furulya','hab','köd','étel','láb','erdő','villa','szökőkút','szabadság','barát','barátság','gyümölcs','üzemanyag','temetés','szőr','jövő','pihe','galaxis','játék','kacat','kert','gáz','ékkő','kórokozó','gejzír','szellem','kacaj','szemüveg','csillámpor','glória','kesztyű','ragasztó','védőszemüveg','gorilla','pletyka','köntös','fű','sírhely','gravitáció','mártás','olaj','mohó','gránát','bánat','grill','bűntudat','rágó','pisztoly','haj','kalapács','függőágy','hörcsög','kéz','bilincs','fogantyú','harmonika','harmónia','szíj','kalap','fejsze','fej','szív','mennyország','pokol','sisak','lyuk','méz','kapucni','kampó','hurok','remény','hormon','szarv','ló','slag','ház','ölelés','hurrikán','jég','bolond','tinta','rovar','sziget','dzseki','befőtt','zselé','dzsem','drágakő','ékszer','vicc','öröm','lé','dzsungel','szemét','karate','kulcs','csók','felszerelés','papírsárkány','kiscica','kés','fűző','létra','hölgy','tó','lámpa','lámpás','lasszó','nevetés','láva','levél','póráz','láb','fény','villám','ajak','zár','szekrény','kenőcs','szerelem','gép','varázslat','mágnes','ember','térkép','filctoll','házasság','mályvacukor','álarc','masszázs','matrac','útvesztő','hús','gyógyszer','emlék','üzenet','tej','menta','csoda','tükör','rakéta','köd','hiba','pénz','majom','szörny','kedv','hold','felmosó','szúnyog','motor','hegy','száj','film','iszap','korsó','gyilkosság','izom','zene','puska','bajusz','rejtély','szieszta','szalvéta','tű','fészek','háló','újság','éjszaka','rémálom','zaj','tészta','orr','óceán','szag','olaj','sütő','oxigén','tömb','evező','kín','festék','pizsama','panda','nadrág','papír','ejtőernyő','parádé','papagáj','buli','szenvedély','krém','tapasz','mancs','béke','gyöngy','toll','büntető','paprika','parfüm','engedély','kisállat','telefon','fotó','uborka','piknik','kép','tabletta','párna','pattanás','kitűző','cső','gödör','szánalom','tányér','gyönyör','dugó','pumpa','zseb','méreg','rúd','tó','kaki','popcorn','fagyi','poszter','gyógyital','bili','erszény','por','tréfa','ima','büszkeség','díj','szonda','ígéret','protein','puding','pocsolya','sütőtök','kutyus','tárca','kirakós','radar','sugárzás','rádió','tutaj','rongy','harag','eső','gereblye','borotva','valóság','recept','megbánás','távirányító','kimenekítő','bosszú','szalag','gyűrű','lázadás','folyó','út','robot','kő','rodeó','romantika','kötél','gumi','pokróc','zsák','nyereg','biztonsági','saláta','homok','szendvics','műhold','szósz','szauna','virsli','fűrész','sál','iskola','kanál','robogó','sikoly','szobor','ülés','titok','mag','szenzor','árnyék','szégyen','sampon','lepedő','burok','pajzs','póló','cipő','ásó','zuhany','szentély','jel','csend','szirén','csont','bőr','szoknya','koponya','borz','ég','szánkó','alvás','csúszós','trutyi','papucs','mosoly','füst','kígyó','horkolás','hó','szappan','zokni','dal','leves','szuvenír','űr','spagetti','lándzsa','pók','tüske','lélek','köpet','szivacs','spray','tavasz','színpad','folt','csillag','szteroid','pörkölt','bot','matrica','zsámoly','vihar','történet','kemence','pánt','szalma','utca','stressz','zsinór','cukor','nap','műtét','meglepetés','szusi','mocsár','izzadság','pulóver','hinta','kapcsoló','kard','szirup','asztal','fark','csörgődob','tank','ragasztószalag','szurok','ponyva','sokkoló','tetkó','adó','csapat','könny','teleszkóp','sátor','teszt','terápia','torok','trón','nyakkendő','tigris','idő','lábujj','tofu','vécé','sírhalom','nyelv','fog','fáklya','tornádó','torpedó','törülköző','torony','forgalom','nyom','edzés','trambulin','csapda','tálca','futópad','kincs','fa','trükk','trófea','kamion','trombita','bizalom','igazság','cunami','kád','gyomor','daganat','járat','teknős','tütü','tévé','esernyő','alsónemű','unikornis','egyenruha','vágy','vakáció','ellenszer','vákuum','gőz','kamra','mellény','győzelem','videó','inda','vírus','látás','vitamin','hang','vulkán','köptető','vagon','fal','pálca','háború','víz','enyv','kerék','ostor','síp','paróka','szél','ablak','szárny','drót','bölcsesség','kívánság','munka','kukac','fonal','ásítás'];
+let remainingRoles = [];
+let remainingCards = [];
+
+const rulesDialog = document.getElementById('rules');
+rulesDialog.onclick = rulesDialog.close;
+
+function refillMaybe(remaining, all) {
+    if (remaining.length === 0) {
+        remaining.push(...all);
+    }
+}
+function getRole() {
+    refillMaybe(remainingRoles, ROLES);
+    const role = remainingRoles.splice(Math.floor(Math.random() * remainingRoles.length), 1);
+    alert(role);
+}
+function getCard() {
+    refillMaybe(remainingCards, CARDS)
+    const card1 = remainingCards.splice(Math.floor(Math.random() * remainingCards.length), 1);
+    refillMaybe(remainingCards, CARDS)
+    const card2 = remainingCards.splice(Math.floor(Math.random() * remainingCards.length), 1);
+    alert(card1 + '\n' + card2);
+}
+function showRules() {
+    rulesDialog.showModal();
+}
+</script>
+</body>
+</html>
